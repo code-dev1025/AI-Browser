@@ -5,6 +5,7 @@ import { useShell } from '../shared/store/shell'
 import { useAi } from '../shared/store/ai'
 import { useLibrary } from '../shared/store/library'
 import { useUi } from '../shared/store/ui'
+import { bindLocale } from '../shared/store/locale'
 import { emit } from '../shared/bus'
 
 /**
@@ -22,6 +23,7 @@ export function useBootstrap(): void {
     const ui = useUi.getState()
 
     const offs: (() => void)[] = [
+      bindLocale(),
       api.on('app:snapshot', (s) => {
         tabs.hydrate(s)
         shell.setShell(s.shell)

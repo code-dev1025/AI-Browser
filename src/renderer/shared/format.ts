@@ -1,3 +1,6 @@
+import type { Locale } from '@shared/types'
+import { intlLocale, translate } from '@shared/i18n'
+
 export function hostOf(url: string): string {
   try {
     return new URL(url).hostname.replace(/^www\./, '')
@@ -16,21 +19,40 @@ export function shortUrl(url: string): string {
   }
 }
 
-const timeFmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' })
-const dayFmt = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' })
+/* Formatters are built per locale and cached — constructing an Intl formatter
+   on every row is measurable in a list of several hundred history entries. */
+const timeFmts = new Map<Locale, Intl.DateTimeFormat>()
+const dayFmts = new Map<Locale, Intl.DateTimeFormat>()
 
-export function clockTime(ts: number): string {
-  return timeFmt.format(ts)
+function timeFmt(locale: Locale): Intl.DateTimeFormat {
+  let f = timeFmts.get(locale)
+  if (!f) {
+    f = new Intl.DateTimeFormat(intlLocale(locale), { hour: '2-digit', minute: '2-digit' })
+    timeFmts.set(locale, f)
+  }
+  return f
 }
 
-export function dayLabel(ts: number): string {
+function dayFmt(locale: Locale): Intl.DateTimeFormat {
+  let f = dayFmts.get(locale)
+  if (!f) {
+    f = new Intl.DateTimeFormat(intlLocale(locale), { month: 'short', day: 'numeric' })
+    dayFmts.set(locale, f)
+  }
+  return f
+}
+
+export function clockTime(ts: number, locale: Locale): string {
+  return timeFmt(locale).format(ts)
+}
+
+export function dayLabel(ts: number, locale: Locale): string {
   const d = new Date(ts)
   const today = new Date()
-  const isToday = d.toDateString() === today.toDateString()
-  if (isToday) return '今日'
+  if (d.toDateString() === today.toDateString()) return translate(locale, 'common.today')
   const yesterday = new Date(today.getTime() - 86_400_000)
-  if (d.toDateString() === yesterday.toDateString()) return '昨日'
-  return dayFmt.format(ts)
+  if (d.toDateString() === yesterday.toDateString()) return translate(locale, 'common.yesterday')
+  return dayFmt(locale).format(ts)
 }
 
 export function duration(seconds: number): string {

@@ -2,6 +2,7 @@ import { send } from '../shared/api'
 import { emit } from '../shared/bus'
 import { useAi } from '../shared/store/ai'
 import { useLibrary } from '../shared/store/library'
+import { tr, useLocaleStore } from '../shared/store/locale'
 import { useShell } from '../shared/store/shell'
 import { useTabs } from '../shared/store/tabs'
 import { useUi } from '../shared/store/ui'
@@ -61,6 +62,9 @@ export function runCommand(commandId: string, arg?: string): void {
         send('focus.set', { tabId: activeTabId, enabled: !tab?.focusMode })
       }
       return
+    case 'language.toggle':
+      useLocaleStore.getState().toggleLocale()
+      return
     case 'ai.panel':
       shell.patchShell({ aiOpen: !shell.shell.aiOpen })
       return
@@ -78,7 +82,9 @@ export function runCommand(commandId: string, arg?: string): void {
       return
     case 'workspace.save': {
       const d = new Date()
-      void useLibrary.getState().saveWorkspace(`作業 ${d.getMonth() + 1}/${d.getDate()}`)
+      void useLibrary
+        .getState()
+        .saveWorkspace(tr('ws.default_name', { month: d.getMonth() + 1, day: d.getDate() }))
       return
     }
     case 'omnibox.focus':

@@ -1,27 +1,28 @@
 import type { PaletteCommand } from '@shared/types'
 
 /**
- * Command *data* only — no imports from stores.
+ * Command *data* only — no imports from stores, and no display text.
  *
- * The overlay renders this list; the shell executes it (see shell/commands.ts).
- * Keeping the catalogue free of store imports is what stops the overlay bundle
- * from pulling in the entire shell.
+ * The overlay renders this list and the shell executes it (see
+ * shell/commands.ts). Entries hold message keys rather than strings so the
+ * palette is in the viewer's language without a second catalogue.
  */
 export const COMMANDS: PaletteCommand[] = [
-  { id: 'tab.new', title: '新しいタブ', hint: null, shortcut: 'Ctrl+T', group: 'タブ' },
-  { id: 'tab.close', title: 'このタブを閉じる', hint: null, shortcut: 'Ctrl+W', group: 'タブ' },
-  { id: 'tab.sleep', title: 'このタブを休眠させる', hint: 'メモリを解放します', shortcut: null, group: 'タブ' },
-  { id: 'tabmode.toggle', title: 'タブ表示を切り替え（縦 / 横）', hint: null, shortcut: null, group: 'タブ' },
-  { id: 'split.toggle', title: '分割画面を切り替え', hint: null, shortcut: null, group: '表示' },
-  { id: 'focus.toggle', title: '集中モードを切り替え', hint: '不要な要素を隠します', shortcut: null, group: '表示' },
-  { id: 'ai.panel', title: 'AIパネルを開閉', hint: null, shortcut: 'Ctrl+Shift+K', group: '表示' },
-  { id: 'ai.organize', title: 'タブをAIで自動整理', hint: '開発 / 調査 / 動画 / 買い物', shortcut: null, group: 'AI' },
-  { id: 'ai.summarize', title: '開いているタブを一括要約', hint: null, shortcut: null, group: 'AI' },
-  { id: 'ai.compare', title: '選択したタブを比較', hint: '2つ以上のタブが必要', shortcut: null, group: 'AI' },
-  { id: 'panel.search', title: '曖昧タブ検索', hint: '自然文で過去のページを探す', shortcut: null, group: 'パネル' },
-  { id: 'panel.history', title: '閲覧タイムライン', hint: null, shortcut: null, group: 'パネル' },
-  { id: 'panel.notes', title: 'メモ・ハイライト', hint: null, shortcut: null, group: 'パネル' },
-  { id: 'panel.workspaces', title: 'ワークスペース', hint: null, shortcut: null, group: 'パネル' },
-  { id: 'workspace.save', title: '今の作業をワークスペースに保存', hint: null, shortcut: null, group: 'ワークスペース' },
-  { id: 'omnibox.focus', title: 'アドレスバーにフォーカス', hint: null, shortcut: 'Ctrl+L', group: '移動' }
+  { id: 'tab.new', titleKey: 'cmd.tab_new', hintKey: null, shortcut: 'Ctrl+T', groupKey: 'cmdgroup.tab' },
+  { id: 'tab.close', titleKey: 'cmd.tab_close', hintKey: null, shortcut: 'Ctrl+W', groupKey: 'cmdgroup.tab' },
+  { id: 'tab.sleep', titleKey: 'cmd.tab_sleep', hintKey: 'cmd.tab_sleep_hint', shortcut: null, groupKey: 'cmdgroup.tab' },
+  { id: 'tabmode.toggle', titleKey: 'cmd.tabmode', hintKey: null, shortcut: null, groupKey: 'cmdgroup.tab' },
+  { id: 'split.toggle', titleKey: 'cmd.split', hintKey: null, shortcut: null, groupKey: 'cmdgroup.view' },
+  { id: 'focus.toggle', titleKey: 'cmd.focus', hintKey: 'cmd.focus_hint', shortcut: null, groupKey: 'cmdgroup.view' },
+  { id: 'ai.panel', titleKey: 'cmd.ai_panel', hintKey: null, shortcut: 'Ctrl+Shift+K', groupKey: 'cmdgroup.view' },
+  { id: 'language.toggle', titleKey: 'cmd.language', hintKey: null, shortcut: null, groupKey: 'cmdgroup.view' },
+  { id: 'ai.organize', titleKey: 'cmd.ai_organize', hintKey: 'cmd.ai_organize_hint', shortcut: null, groupKey: 'cmdgroup.ai' },
+  { id: 'ai.summarize', titleKey: 'cmd.ai_summarize', hintKey: null, shortcut: null, groupKey: 'cmdgroup.ai' },
+  { id: 'ai.compare', titleKey: 'cmd.ai_compare', hintKey: 'cmd.ai_compare_hint', shortcut: null, groupKey: 'cmdgroup.ai' },
+  { id: 'panel.search', titleKey: 'cmd.panel_search', hintKey: 'cmd.panel_search_hint', shortcut: null, groupKey: 'cmdgroup.panel' },
+  { id: 'panel.history', titleKey: 'cmd.panel_history', hintKey: null, shortcut: null, groupKey: 'cmdgroup.panel' },
+  { id: 'panel.notes', titleKey: 'cmd.panel_notes', hintKey: null, shortcut: null, groupKey: 'cmdgroup.panel' },
+  { id: 'panel.workspaces', titleKey: 'cmd.panel_workspaces', hintKey: null, shortcut: null, groupKey: 'cmdgroup.panel' },
+  { id: 'workspace.save', titleKey: 'cmd.workspace_save', hintKey: null, shortcut: null, groupKey: 'cmdgroup.workspace' },
+  { id: 'omnibox.focus', titleKey: 'cmd.omnibox', hintKey: null, shortcut: 'Ctrl+L', groupKey: 'cmdgroup.nav' }
 ]
