@@ -144,7 +144,6 @@ const ja = {
   /* --- status bar --- */
   'status.loading': '読み込み中…',
   'status.selected': '{n} 選択',
-  'status.page_rect': 'main が計算したページ矩形',
 
   /* --- compare --- */
   'compare.title': '比較表',
@@ -383,7 +382,6 @@ const en: Record<MessageKey, string> = {
 
   'status.loading': 'Loading…',
   'status.selected': '{n} selected',
-  'status.page_rect': 'Page rect computed in the main process',
 
   'compare.title': 'Comparison',
 
