@@ -1,0 +1,161 @@
+/*
+ * Design tokens for the browser chrome.
+ *
+ * Chrome controls are FIXED px, never scaled with the viewport: a button is a
+ * hit target, not text, and it should feel the same on 1366×768 and on 4K
+ * (blueprint L7). The px values themselves are injected at runtime from
+ * shared/layout.ts so main and the DOM can never disagree.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Light */
+  --bg: #eef1f6;
+  --bg-2: #f8fafc;
+  --bg-3: #ffffff;
+  --bg-sunken: #e2e7ef;
+  --fg: #141922;
+  --fg-2: #4b5568;
+  --fg-3: #7c879b;
+  --line: #d3dae5;
+  --line-soft: #e3e8f0;
+  --accent: #2b3f73;
+  --accent-fg: #ffffff;
+  --accent-soft: #dce3f2;
+  --seal: #b93e2a;
+  --seal-soft: #f7e3df;
+  --teal: #2c6c64;
+  --teal-soft: #dcece9;
+  --amber: #8a6412;
+  --shadow-1: 0 1px 2px rgba(20, 25, 34, 0.08);
+  --shadow-2: 0 8px 28px -12px rgba(20, 25, 34, 0.32);
+
+  /* Tab group colours */
+  --g-indigo: #4864a8;
+  --g-teal: #2c6c64;
+  --g-amber: #a97b19;
+  --g-rose: #b0424f;
+  --g-violet: #6a4b9c;
+  --g-slate: #64708a;
+
+  --radius: 6px;
+  --radius-sm: 4px;
+  --font: "Segoe UI Variable Text", "Segoe UI", "Yu Gothic UI", Meiryo, system-ui, sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Overwritten from shared/layout.ts on boot. */
+  --h-title: 36px;
+  --h-tabs: 34px;
+  --h-toolbar: 40px;
+  --h-status: 22px;
+  --h-ask: 44px;
+  --w-left: 48px;
+  --w-ai: 0px;
+  --w-gutter: 4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12151c;
+    --bg-2: #171b24;
+    --bg-3: #1f2430;
+    --bg-sunken: #0c0f15;
+    --fg: #e7eaf1;
+    --fg-2: #aeb6c6;
+    --fg-3: #7f8899;
+    --line: #2c3340;
+    --line-soft: #232935;
+    --accent: #7f9ade;
+    --accent-fg: #101420;
+    --accent-soft: #232c43;
+    --seal: #e8775f;
+    --seal-soft: #3a241f;
+    --teal: #63b3a8;
+    --teal-soft: #1c2e2c;
+    --amber: #d0a94a;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shadow-2: 0 10px 30px -12px rgba(0, 0, 0, 0.85);
+
+    --g-indigo: #7f9ade;
+    --g-teal: #63b3a8;
+    --g-amber: #d0a94a;
+    --g-rose: #e08494;
+    --g-violet: #a98ede;
+    --g-slate: #93a0b8;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--bg);
+  overflow: hidden;
+  /* Japanese titles have no spaces — let the browser break them anywhere. */
+  line-break: strict;
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: default;
+}
+
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+  user-select: text;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-3);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
