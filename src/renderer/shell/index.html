@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      The shell renders text extracted from arbitrary web pages, so it must not
+      be able to load or execute anything from the network. The __CSP_* markers
+      are filled in by cspPlugin(): dev-only allowances, empty in a build.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'__CSP_SCRIPT__; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: tabshot: https:; font-src 'self'; connect-src 'self'__CSP_CONNECT__"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Browser</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
+</html>
