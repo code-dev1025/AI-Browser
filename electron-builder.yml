@@ -1,0 +1,19 @@
+appId: dev.aibrowser.shell
+productName: AI Browser
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**/*
+  - package.json
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  # Windows 10 (1809+) and Windows 11, 64-bit only.
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
