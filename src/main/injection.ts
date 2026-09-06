@@ -9,13 +9,16 @@
 
 import type { WebContents } from 'electron'
 import type { TabId } from '@shared/types'
+import type { MessageKey } from '@shared/i18n'
+import { tm } from './settings'
 
 export interface HideRule {
   id: string
   /** Hosts this rule applies to. `*` = everywhere. */
   host: string
   selector: string
-  reason: string
+  /** Message key — the UI has to be able to say why in the user's language. */
+  reasonKey: MessageKey
 }
 
 export const RULE_VERSION = 1
@@ -25,15 +28,15 @@ export const RULE_VERSION = 1
  * that hides real content gets switched off and never switched back on.
  */
 export const DEFAULT_RULES: HideRule[] = [
-  { id: 'aside', host: '*', selector: 'aside', reason: 'サイドバー' },
-  { id: 'ads', host: '*', selector: '[id*="ad-" i],[class*="advert" i],ins.adsbygoogle', reason: '広告' },
-  { id: 'related', host: '*', selector: '[class*="related" i],[class*="recommend" i]', reason: '関連記事' },
-  { id: 'social', host: '*', selector: '[class*="share" i],[class*="social" i]', reason: 'SNSボタン' },
-  { id: 'sticky', host: '*', selector: '[class*="sticky" i][class*="banner" i],[class*="popup" i]', reason: '固定バナー' },
-  { id: 'newsletter', host: '*', selector: '[class*="newsletter" i],[class*="subscribe" i]', reason: '購読案内' },
-  { id: 'yt-sidebar', host: 'youtube.com', selector: '#secondary,#related', reason: '次の動画' },
-  { id: 'yt-comments', host: 'youtube.com', selector: '#comments', reason: 'コメント' },
-  { id: 'gh-feed', host: 'github.com', selector: '.feed-right-sidebar', reason: 'サイドフィード' }
+  { id: 'aside', host: '*', selector: 'aside', reasonKey: 'hide.sidebar' },
+  { id: 'ads', host: '*', selector: '[id*="ad-" i],[class*="advert" i],ins.adsbygoogle', reasonKey: 'hide.ads' },
+  { id: 'related', host: '*', selector: '[class*="related" i],[class*="recommend" i]', reasonKey: 'hide.related' },
+  { id: 'social', host: '*', selector: '[class*="share" i],[class*="social" i]', reasonKey: 'hide.social' },
+  { id: 'sticky', host: '*', selector: '[class*="sticky" i][class*="banner" i],[class*="popup" i]', reasonKey: 'hide.sticky' },
+  { id: 'newsletter', host: '*', selector: '[class*="newsletter" i],[class*="subscribe" i]', reasonKey: 'hide.newsletter' },
+  { id: 'yt-sidebar', host: 'youtube.com', selector: '#secondary,#related', reasonKey: 'hide.yt_next' },
+  { id: 'yt-comments', host: 'youtube.com', selector: '#comments', reasonKey: 'hide.yt_comments' },
+  { id: 'gh-feed', host: 'github.com', selector: '.feed-right-sidebar', reasonKey: 'hide.gh_feed' }
 ]
 
 function cssFor(host: string, rules: HideRule[]): string {
@@ -46,7 +49,7 @@ function cssFor(host: string, rules: HideRule[]): string {
 interface Applied {
   key: string
   host: string
-  hidden: { selector: string; reason: string }[]
+  hidden: { selector: string; reasonKey: MessageKey }[]
 }
 
 export class InjectionManager {
@@ -59,7 +62,10 @@ export class InjectionManager {
 
   /** What was hidden on this tab, so the UI can explain itself. */
   report(tabId: TabId): { selector: string; reason: string }[] {
-    return this.applied.get(tabId)?.hidden ?? []
+    return (this.applied.get(tabId)?.hidden ?? []).map((h) => ({
+      selector: h.selector,
+      reason: tm(h.reasonKey)
+    }))
   }
 
   isOn(tabId: TabId): boolean {
@@ -78,7 +84,7 @@ export class InjectionManager {
         host,
         hidden: this.rules
           .filter((r) => r.host === '*' || host.endsWith(r.host))
-          .map((r) => ({ selector: r.selector, reason: r.reason }))
+          .map((r) => ({ selector: r.selector, reasonKey: r.reasonKey }))
       })
     } catch {
       /* page gone mid-injection */

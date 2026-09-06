@@ -7,6 +7,9 @@
  * product fields). Where a real model would be needed, the text says so plainly
  * rather than inventing facts — mock output must never be mistaken for an
  * answer.
+ *
+ * It speaks the interface language, because a Japanese UI answering in English
+ * (or the reverse) reads as a bug even when the content is a placeholder.
  */
 
 import type {
@@ -19,48 +22,50 @@ import type {
   SearchHit,
   SummaryResult
 } from '@shared/types'
+import type { MessageKey } from '@shared/i18n'
+import { tm } from '../settings'
 import type { AskContext, BackendClient, SearchCorpusEntry, StreamHandlers } from './types'
 
 const MOCK = '[mock]'
 
 /** Domain → bucket. The same buckets the AI organiser is expected to produce. */
-const BUCKETS: { name: string; color: GroupColor; hosts: RegExp; words: RegExp }[] = [
+const BUCKETS: { key: MessageKey; color: GroupColor; hosts: RegExp; words: RegExp }[] = [
   {
-    name: '開発',
+    key: 'mock.group_dev',
     color: 'indigo',
     hosts: /github|gitlab|stackoverflow|npmjs|developer\.mozilla|localhost|codepen|vercel|zenn|qiita/i,
     words: /\b(api|typescript|javascript|react|python|npm|install|function|component|repository)\b/i
   },
   {
-    name: '動画',
+    key: 'mock.group_video',
     color: 'rose',
     hosts: /youtube|youtu\.be|vimeo|nicovideo|twitch|abema|netflix/i,
-    words: /\b(subscribe|watch later|再生|チャンネル登録)\b/i
+    words: /(subscribe|watch later|再生|チャンネル登録)/i
   },
   {
-    name: '買い物',
+    key: 'mock.group_shopping',
     color: 'amber',
     hosts: /amazon|rakuten|mercari|yahoo.*shopping|ebay|aliexpress|zozo|kakaku/i,
     words: /(カートに入れる|add to cart|税込|送料無料|在庫あり|price|¥\s?\d)/i
   },
   {
-    name: '調査',
+    key: 'mock.group_research',
     color: 'teal',
     hosts: /wikipedia|scholar|arxiv|nature|note\.com|medium|hatena/i,
     words: /\b(research|study|論文|調査|according to)\b/i
   }
 ]
 
-function bucketFor(page: ExtractedPage): { name: string; color: GroupColor } {
+function bucketFor(page: ExtractedPage): { key: MessageKey; color: GroupColor } {
   const host = safeHost(page.url)
   const sample = `${page.title} ${page.text.slice(0, 1500)}`
   for (const b of BUCKETS) {
-    if (b.hosts.test(host)) return { name: b.name, color: b.color }
+    if (b.hosts.test(host)) return { key: b.key, color: b.color }
   }
   for (const b of BUCKETS) {
-    if (b.words.test(sample)) return { name: b.name, color: b.color }
+    if (b.words.test(sample)) return { key: b.key, color: b.color }
   }
-  return { name: 'その他', color: 'slate' }
+  return { key: 'mock.group_other', color: 'slate' }
 }
 
 function safeHost(url: string): string {
@@ -79,10 +84,10 @@ function sentences(text: string): string[] {
     .filter((s) => s.length > 12)
 }
 
-function firstQuote(page: ExtractedPage): { quote: string; offset: number } {
-  const s = sentences(page.text)[0] ?? page.excerpt ?? page.title
-  const offset = page.text.indexOf(s)
-  return { quote: s.slice(0, 180), offset: offset >= 0 ? offset : null } as never
+function firstQuote(page: ExtractedPage): { quote: string; offset: number | null } {
+  const sentence = sentences(page.text)[0] ?? page.excerpt ?? page.title
+  const at = page.text.indexOf(sentence)
+  return { quote: sentence.slice(0, 180), offset: at >= 0 ? at : null }
 }
 
 export class MockBackend implements BackendClient {
@@ -124,46 +129,44 @@ export class MockBackend implements BackendClient {
   private composeAnswer(ctx: AskContext): string {
     const { question, pages } = ctx
     if (pages.length === 0) {
-      return `${MOCK} 読み取れるページがありません。タブを開いてからもう一度お試しください。\n\n(バックエンド未接続。INTEGRATION.md の /ask を実装すると、この応答が実際のモデル出力に置き換わります。)`
+      return `${MOCK} ${tm('mock.no_pages')}\n\n${tm('mock.not_connected')}`
     }
 
     const lines: string[] = []
-    lines.push(`${MOCK} ${pages.length} 件のページを読み取りました。\n`)
-    lines.push(`質問: ${question}\n`)
+    lines.push(`${MOCK} ${tm('mock.read_pages', { n: pages.length })}\n`)
+    lines.push(`${tm('mock.question', { q: question })}\n`)
 
     for (const p of pages.slice(0, 6)) {
       const host = safeHost(p.url)
-      const head = p.headings.slice(0, 3).map((h) => h.text).filter(Boolean)
+      const heads = p.headings.slice(0, 3).map((h) => h.text).filter(Boolean)
       lines.push(`\n■ ${p.title || host} (${host}) — ${p.wordCount} words`)
-      if (head.length) lines.push(`  見出し: ${head.join(' / ')}`)
-      const s = sentences(p.text).slice(0, 2)
-      for (const line of s) lines.push(`  ${line.slice(0, 160)}`)
+      if (heads.length) lines.push(`  ${tm('mock.headings', { list: heads.join(' / ') })}`)
+      for (const line of sentences(p.text).slice(0, 2)) lines.push(`  ${line.slice(0, 160)}`)
       if (p.product?.price) {
-        lines.push(`  価格: ${p.product.price}${p.product.availability ? ` · ${p.product.availability}` : ''}`)
+        const stock = p.product.availability ? ` · ${p.product.availability}` : ''
+        lines.push(`  ${tm('mock.price', { price: p.product.price })}${stock}`)
       }
     }
 
-    lines.push(
-      `\n──\nこれは抽出結果をそのまま並べたものです。要約・推論はバックエンド接続後に有効になります。`
-    )
+    lines.push(`\n──\n${tm('mock.footer')}`)
     return lines.join('\n')
   }
 
   async organize(pages: ExtractedPage[]): Promise<OrganizeSuggestion[]> {
-    const byBucket = new Map<string, { color: GroupColor; tabIds: string[] }>()
+    const byBucket = new Map<MessageKey, { color: GroupColor; tabIds: string[] }>()
     for (const p of pages) {
       const b = bucketFor(p)
-      const entry = byBucket.get(b.name) ?? { color: b.color, tabIds: [] }
+      const entry = byBucket.get(b.key) ?? { color: b.color, tabIds: [] }
       entry.tabIds.push(p.tabId)
-      byBucket.set(b.name, entry)
+      byBucket.set(b.key, entry)
     }
     return [...byBucket.entries()]
       .filter(([, v]) => v.tabIds.length > 0)
-      .map(([name, v]) => ({
-        groupName: name,
+      .map(([key, v]) => ({
+        groupName: tm(key),
         color: v.color,
         tabIds: v.tabIds,
-        reason: `ドメインと本文のキーワードから分類 ${MOCK}`
+        reason: `${tm('mock.organize_reason')} ${MOCK}`
       }))
       .sort((a, b) => b.tabIds.length - a.tabIds.length)
   }
@@ -173,12 +176,12 @@ export class MockBackend implements BackendClient {
       const bullets: string[] = []
       for (const h of p.headings.slice(0, 5)) if (h.text.trim()) bullets.push(h.text.trim())
       for (const s of sentences(p.text).slice(0, 5 - bullets.length)) bullets.push(s.slice(0, 200))
-      if (bullets.length === 0) bullets.push('本文を抽出できませんでした。')
+      if (bullets.length === 0) bullets.push(tm('mock.no_text'))
       return {
         tabId: p.tabId,
         title: p.title,
         url: p.url,
-        bullets: bullets.map((b) => `${b}`),
+        bullets,
         readingMinutes: Math.max(1, Math.round(p.wordCount / 400))
       }
     })
@@ -209,14 +212,16 @@ export class MockBackend implements BackendClient {
       rows.push({ label, values, bestIndex })
     }
 
-    add('サイト', pages.map((p) => safeHost(p.url)))
-    add('商品名', pages.map((p) => p.product?.name ?? p.title ?? null))
-    add('価格', pages.map((p) => p.product?.price ?? null), 'min')
-    add('在庫', pages.map((p) => p.product?.availability ?? null))
-    add('評価', pages.map((p) => p.product?.rating ?? null), 'max')
-    add('レビュー数', pages.map((p) => p.product?.reviewCount ?? null), 'max')
-    add('販売者', pages.map((p) => p.product?.seller ?? null))
-    add('本文の長さ', pages.map((p) => `${p.wordCount} words`))
+    const priceLabel = tm('mock.col_price')
+
+    add(tm('mock.col_site'), pages.map((p) => safeHost(p.url)))
+    add(tm('mock.col_name'), pages.map((p) => p.product?.name ?? p.title ?? null))
+    add(priceLabel, pages.map((p) => p.product?.price ?? null), 'min')
+    add(tm('mock.col_stock'), pages.map((p) => p.product?.availability ?? null))
+    add(tm('mock.col_rating'), pages.map((p) => p.product?.rating ?? null), 'max')
+    add(tm('mock.col_reviews'), pages.map((p) => p.product?.reviewCount ?? null), 'max')
+    add(tm('mock.col_seller'), pages.map((p) => p.product?.seller ?? null))
+    add(tm('mock.col_length'), pages.map((p) => `${p.wordCount} words`))
 
     // Any spec label that appears on at least two pages becomes a row.
     const labels = new Map<string, number>()
@@ -228,11 +233,14 @@ export class MockBackend implements BackendClient {
       add(label, pages.map((p) => p.product?.specs.find((s) => s.label === label)?.value ?? null))
     }
 
-    const priceRow = rows.find((r) => r.label === '価格')
+    const priceRow = rows.find((r) => r.label === priceLabel)
     const verdict =
       priceRow && priceRow.bestIndex !== null
-        ? `最安は「${columns[priceRow.bestIndex]?.title ?? ''}」（${priceRow.values[priceRow.bestIndex]}）${MOCK}`
-        : `抽出できた項目を並べました。判定はバックエンド接続後に有効になります。${MOCK}`
+        ? `${tm('mock.verdict_cheapest', {
+            title: columns[priceRow.bestIndex]?.title ?? '',
+            price: priceRow.values[priceRow.bestIndex] ?? ''
+          })} ${MOCK}`
+        : `${tm('mock.verdict_generic')} ${MOCK}`
 
     return { tabIds: pages.map((p) => p.tabId), columns, rows, verdict }
   }
@@ -251,8 +259,7 @@ export class MockBackend implements BackendClient {
       for (const t of terms) {
         if (entry.title.toLowerCase().includes(t)) score += 3
         if (entry.url.toLowerCase().includes(t)) score += 1
-        const idx = haystack.indexOf(t)
-        if (idx >= 0) score += 1
+        if (haystack.includes(t)) score += 1
       }
       if (score === 0) continue
       const firstTerm = terms.find((t) => entry.text.toLowerCase().includes(t))
