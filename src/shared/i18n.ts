@@ -51,6 +51,10 @@ const ja = {
   'titlebar.backend_mock_tip': 'モック応答',
   'titlebar.ai_panel': 'AIパネル (Ctrl+Shift+K)',
   'titlebar.language': '表示言語を切り替え',
+  'win.minimize': '最小化',
+  'win.maximize': '最大化',
+  'win.restore': '元のサイズに戻す',
+  'win.close': '閉じる',
 
   /* --- toolbar --- */
   'toolbar.back': '戻る (Alt+←)',
@@ -277,6 +281,10 @@ const en: Record<MessageKey, string> = {
   'titlebar.backend_mock_tip': 'Mock responses',
   'titlebar.ai_panel': 'AI panel (Ctrl+Shift+K)',
   'titlebar.language': 'Switch interface language',
+  'win.minimize': 'Minimise',
+  'win.maximize': 'Maximise',
+  'win.restore': 'Restore down',
+  'win.close': 'Close',
 
   'toolbar.back': 'Back (Alt+Left)',
   'toolbar.forward': 'Forward (Alt+Right)',

@@ -1,4 +1,5 @@
 import { LOCALES, LOCALE_LABEL, LOCALE_SHORT } from '@shared/i18n'
+import { send } from '../../shared/api'
 import { useLibrary } from '../../shared/store/library'
 import { useLocaleStore, useT } from '../../shared/store/locale'
 import { useShell } from '../../shared/store/shell'
@@ -74,7 +75,36 @@ export function TitleBar(): React.ReactElement {
       >
         <Icon name="ai" />
       </button>
+
+      <WindowControls />
     </header>
+  )
+}
+
+/**
+ * The window is frameless, so these are ours to draw. Sizes follow the Windows
+ * convention (46px wide, full title-bar height) so the hit targets land where
+ * muscle memory expects them.
+ */
+function WindowControls(): React.ReactElement {
+  const t = useT()
+  const maximized = useShell((s) => s.metrics.maximized)
+
+  return (
+    <div className="wincontrols">
+      <button title={t('win.minimize')} onClick={() => send('window.minimize')}>
+        <Icon name="winMinimize" size={13} />
+      </button>
+      <button
+        title={t(maximized ? 'win.restore' : 'win.maximize')}
+        onClick={() => send('window.toggleMaximize')}
+      >
+        <Icon name={maximized ? 'winRestore' : 'winMaximize'} size={13} />
+      </button>
+      <button className="close" title={t('win.close')} onClick={() => send('window.close')}>
+        <Icon name="close" size={13} />
+      </button>
+    </div>
   )
 }
 

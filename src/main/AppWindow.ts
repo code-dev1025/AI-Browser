@@ -9,7 +9,7 @@
  * never sends pixels (blueprint L2). That is what keeps resizing seam-free.
  */
 
-import { BaseWindow, WebContentsView, nativeTheme, type Session, type WebContents } from 'electron'
+import { BaseWindow, WebContentsView, type Session, type WebContents } from 'electron'
 import { join } from 'node:path'
 import {
   CHROME,
@@ -60,15 +60,21 @@ export class AppWindow implements TabHost {
   constructor(session: Session) {
     this.session = session
 
+    // Fully frameless, not titleBarStyle:'hidden'.
+    //
+    // With a hidden title bar Windows keeps its 8px resize border, so Electron
+    // reports a content width 17px wider than the client area actually painted:
+    // everything anchored to the right edge — toolbar buttons, panel close,
+    // send — is laid out off-screen. Frameless makes window bounds and client
+    // area the same rectangle, at the cost of drawing our own window buttons.
     this.win = new BaseWindow({
       width: 1440,
       height: 900,
       minWidth: 900,
       minHeight: 560,
       show: false,
+      frame: false,
       backgroundColor: '#12151c',
-      titleBarStyle: 'hidden',
-      titleBarOverlay: overlayColors(),
       title: 'AI Browser'
     })
 
@@ -96,14 +102,6 @@ export class AppWindow implements TabHost {
     this.win.on('leave-full-screen', () => this.applyLayout())
     this.win.on('closed', () => {
       this.destroyed = true
-    })
-
-    nativeTheme.on('updated', () => {
-      try {
-        this.win.setTitleBarOverlay(overlayColors())
-      } catch {
-        /* not supported on this platform */
-      }
     })
 
     const reveal = (): void => {
@@ -351,15 +349,6 @@ export class AppWindow implements TabHost {
 
   relayout(): void {
     this.applyLayout()
-  }
-}
-
-function overlayColors(): { color: string; symbolColor: string; height: number } {
-  const dark = nativeTheme.shouldUseDarkColors
-  return {
-    color: dark ? '#171b24' : '#f3f5f8',
-    symbolColor: dark ? '#e7eaf1' : '#141922',
-    height: CHROME.titleBar
   }
 }
 

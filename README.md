@@ -120,9 +120,10 @@ src/
 - **IME**: URL バー・検索・メモ・AI 入力のすべてで `isComposing` を見てから
   Enter を処理します。変換中の Enter で遷移・送信しません。補完は
   `compositionend` で発火します。
-- **タイトルバー**: `titleBarOverlay` を使用（Windows 10 で動作）。ボタン幅は
-  `navigator.windowControlsOverlay.getTitlebarAreaRect()` から実測し、決め打ち
-  しません。
+- **タイトルバー**: 完全フレームレス（`frame: false`）で、ウィンドウボタンは自前
+  描画です。`titleBarStyle: 'hidden'` だと Windows が 8px のリサイズ枠を残すため、
+  Electron が報告するコンテンツ幅が実際のクライアント領域より 17px 広くなり、右端
+  に寄せた要素が画面外に配置されます。フレームレスなら両者が一致します。
 - **Windows 11 専用機能は不使用**: Mica や角丸ウィンドウは Windows 10 で無視
   されるため、それ抜きで成立する見た目にしています。
 - **配布**: `npm run package` は electron-builder のツールが Node 22.12+ を要求

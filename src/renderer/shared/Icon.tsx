@@ -26,7 +26,10 @@ const PATHS = {
   check: 'M5 12l5 5L20 7',
   external: 'M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5',
   bookmark: 'M6 4h12v16l-6-4-6 4z',
-  spinner: 'M12 3a9 9 0 019 9'
+  spinner: 'M12 3a9 9 0 019 9',
+  winMinimize: 'M5 12h14',
+  winMaximize: 'M5.5 5.5h13v13h-13z',
+  winRestore: 'M8.5 8.5V4.5h11v11h-4M4.5 8.5h11v11h-11z'
 } as const
 
 export type IconName = keyof typeof PATHS

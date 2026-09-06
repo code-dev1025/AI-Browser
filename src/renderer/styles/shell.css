@@ -65,8 +65,6 @@
   background: var(--bg-2);
   border-bottom: 1px solid var(--line);
   -webkit-app-region: drag;
-  /* Right padding is reserved for the native window controls overlay. */
-  padding-right: var(--wco-right, 148px);
 }
 
 .titlebar > * {
@@ -122,6 +120,30 @@
 .badge.down {
   color: var(--seal);
   border-color: color-mix(in srgb, var(--seal) 45%, transparent);
+}
+
+/* The window is frameless, so we draw the window buttons ourselves. They sit
+   flush to the top-right corner, the way every other Windows app does. */
+.wincontrols {
+  display: flex;
+  align-self: stretch;
+  flex: none;
+  margin-left: 6px;
+}
+.wincontrols button {
+  width: 46px;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  color: var(--fg-2);
+}
+.wincontrols button:hover {
+  background: var(--bg-3);
+  color: var(--fg);
+}
+.wincontrols button.close:hover {
+  background: #c42b1c;
+  color: #ffffff;
 }
 
 /* Language picker: both options always visible, so someone who cannot read

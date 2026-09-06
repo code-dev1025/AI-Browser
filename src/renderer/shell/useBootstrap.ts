@@ -71,34 +71,9 @@ export function useBootstrap(): void {
     }
     window.addEventListener('keydown', onKey)
 
-    // Window control overlay: reserve exactly the space Windows actually uses
-    // rather than hardcoding a width.
-    const wco = (
-      navigator as Navigator & {
-        windowControlsOverlay?: {
-          getTitlebarAreaRect(): DOMRect
-          addEventListener(t: string, l: () => void): void
-        }
-      }
-    ).windowControlsOverlay
-    const syncWco = (): void => {
-      try {
-        const rect = wco?.getTitlebarAreaRect()
-        if (!rect) return
-        const right = Math.max(0, window.innerWidth - (rect.x + rect.width))
-        document.documentElement.style.setProperty('--wco-right', `${right + 8}px`)
-      } catch {
-        /* not supported */
-      }
-    }
-    syncWco()
-    wco?.addEventListener('geometrychange', syncWco)
-    window.addEventListener('resize', syncWco)
-
     return () => {
       offs.forEach((off) => off())
       window.removeEventListener('keydown', onKey)
-      window.removeEventListener('resize', syncWco)
     }
   }, [])
 }
