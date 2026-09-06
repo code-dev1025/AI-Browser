@@ -5,6 +5,7 @@ import { api, send } from '../../shared/api'
 import { Icon } from '../../shared/Icon'
 import { shortUrl } from '../../shared/format'
 import { useLibrary } from '../../shared/store/library'
+import { useT } from '../../shared/store/locale'
 import { useShell } from '../../shared/store/shell'
 import { useTabs } from '../../shared/store/tabs'
 
@@ -131,6 +132,7 @@ function PanePlaceholder({
   tab: TabModel | undefined
   index: number
 }): React.ReactElement | null {
+  const t = useT()
   const style = {
     position: 'absolute' as const,
     left: pane.x - rect.x,
@@ -143,11 +145,7 @@ function PanePlaceholder({
     if (index === 0) return <div style={style}><StartPage /></div>
     return (
       <div style={style} className="placeholder">
-        <div className="empty">
-          このペインは空です。
-          <br />
-          タブを選ぶと表示されます。
-        </div>
+        <div className="empty">{t('pane.empty')}</div>
       </div>
     )
   }
@@ -162,11 +160,11 @@ function PanePlaceholder({
           <div>
             <strong>{tab.title}</strong>
             <div className="empty" style={{ padding: '4px 0' }}>
-              メモリ節約のため休眠中です。{shortUrl(tab.url)}
+              {t('sleeping.body', { host: shortUrl(tab.url) })}
             </div>
           </div>
           <button className="btn primary" onClick={() => send('tab.wake', { tabId: tab.id })}>
-            <Icon name="reload" size={13} /> 復元する
+            <Icon name="reload" size={13} /> {t('sleeping.wake')}
           </button>
         </div>
       </div>
@@ -177,10 +175,10 @@ function PanePlaceholder({
     return (
       <div style={style} className="placeholder">
         <div className="sleeping">
-          <strong>このタブは応答しなくなりました</strong>
+          <strong>{t('crashed.title')}</strong>
           <div className="empty" style={{ padding: 0 }}>{tab.errorText}</div>
           <button className="btn primary" onClick={() => send('tab.reload', { tabId: tab.id })}>
-            再読み込み
+            {t('common.reload')}
           </button>
         </div>
       </div>
@@ -201,6 +199,7 @@ function PanePlaceholder({
 
 /** The home screen: recent work, not a grid of logos. */
 function StartPage(): React.ReactElement {
+  const t = useT()
   const history = useLibrary((s) => s.history)
   const workspaces = useLibrary((s) => s.workspaces)
   const notes = useLibrary((s) => s.notes)
@@ -226,15 +225,13 @@ function StartPage(): React.ReactElement {
     <div className="placeholder">
       <div className="startpage">
         <div>
-          <h1>新しいタブ</h1>
-          <div className="sub">
-            URL を入力するか、下から続きを再開してください。Ctrl+K で全機能を検索できます。
-          </div>
+          <h1>{t('start.title')}</h1>
+          <div className="sub">{t('start.sub')}</div>
         </div>
 
         {recent.length > 0 && (
           <div>
-            <div className="vhead">最近見たページ</div>
+            <div className="vhead">{t('start.recent')}</div>
             <div className="cards">
               {recent.map((h) => (
                 <button key={h.id} className="card" onClick={() => open(h.url)}>
@@ -248,12 +245,12 @@ function StartPage(): React.ReactElement {
 
         {workspaces.length > 0 && (
           <div>
-            <div className="vhead">保存済みワークスペース</div>
+            <div className="vhead">{t('start.workspaces')}</div>
             <div className="cards">
               {[...workspaces].reverse().slice(0, 4).map((w) => (
                 <button key={w.id} className="card" onClick={() => void restore(w.id, false)}>
                   <span className="t">{w.name}</span>
-                  <span className="d">{w.tabs.length} タブを復元</span>
+                  <span className="d">{t('start.restore_n', { n: w.tabs.length })}</span>
                 </button>
               ))}
             </div>
@@ -262,12 +259,12 @@ function StartPage(): React.ReactElement {
 
         {notes.length > 0 && (
           <div>
-            <div className="vhead">保存したメモ · {notes.length} 件</div>
+            <div className="vhead">{t('start.notes', { n: notes.length })}</div>
             <div className="cards">
               {[...notes].reverse().slice(0, 3).map((n) => (
                 <button key={n.id} className="card" onClick={() => n.url && open(n.url)}>
                   <span className="t">{n.text.slice(0, 60)}</span>
-                  <span className="d">{n.url ? shortUrl(n.url) : 'メモ'}</span>
+                  <span className="d">{n.url ? shortUrl(n.url) : t('start.note')}</span>
                 </button>
               ))}
             </div>

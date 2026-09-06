@@ -4,9 +4,11 @@ import { useShell } from '../../shared/store/shell'
 import { useTabs } from '../../shared/store/tabs'
 import { useUi } from '../../shared/store/ui'
 import { on } from '../../shared/bus'
+import { useT } from '../../shared/store/locale'
 
 /** The one-line ask bar from the sketch: always there, never in the way. */
 export function AskBar(): React.ReactElement {
+  const t = useT()
   const [value, setValue] = useState('')
   const [composing, setComposing] = useState(false)
   const ref = useRef<HTMLInputElement>(null)
@@ -38,9 +40,7 @@ export function AskBar(): React.ReactElement {
         ref={ref}
         value={value}
         placeholder={
-          scope === 'tabs'
-            ? '開いているタブ全部に質問…'
-            : 'このページについて質問してください…'
+          scope === 'tabs' ? t('ask.placeholder_tabs') : t('ask.placeholder_page')
         }
         onChange={(e) => setValue(e.target.value)}
         onCompositionStart={() => setComposing(true)}
@@ -52,7 +52,7 @@ export function AskBar(): React.ReactElement {
         }}
       />
       <button className="btn" onClick={submit} disabled={busy || !value.trim()}>
-        {busy ? '応答中…' : '送信'}
+        {busy ? t('ask.busy') : t('common.send')}
       </button>
     </div>
   )

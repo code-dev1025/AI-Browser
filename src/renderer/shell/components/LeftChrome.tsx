@@ -1,20 +1,22 @@
 import { send } from '../../shared/api'
 import { Icon, type IconName } from '../../shared/Icon'
 import { importance } from '../../shared/format'
+import { useT } from '../../shared/store/locale'
 import { useShell } from '../../shared/store/shell'
 import { groupColorVar, useTabs } from '../../shared/store/tabs'
 import { useUi } from '../../shared/store/ui'
 import type { RailPanel } from '@shared/types'
+import type { MessageKey } from '@shared/i18n'
 import { HistoryPanel } from './panels/HistoryPanel'
 import { NotesPanel } from './panels/NotesPanel'
 import { SearchPanel } from './panels/SearchPanel'
 import { WorkspacePanel } from './panels/WorkspacePanel'
 
-const BUTTONS: { id: RailPanel; icon: IconName; label: string }[] = [
-  { id: 'search', icon: 'search', label: '検索 — 自然文で過去のページを探す' },
-  { id: 'history', icon: 'history', label: '閲覧タイムライン' },
-  { id: 'notes', icon: 'note', label: 'メモ・ハイライト' },
-  { id: 'workspaces', icon: 'workspace', label: 'ワークスペース' }
+const BUTTONS: { id: RailPanel; icon: IconName; labelKey: MessageKey }[] = [
+  { id: 'search', icon: 'search', labelKey: 'rail.search' },
+  { id: 'history', icon: 'history', labelKey: 'rail.history' },
+  { id: 'notes', icon: 'note', labelKey: 'rail.notes' },
+  { id: 'workspaces', icon: 'workspace', labelKey: 'rail.workspaces' }
 ]
 
 /**
@@ -23,6 +25,7 @@ const BUTTONS: { id: RailPanel; icon: IconName; label: string }[] = [
  * it. Nothing here is duplicated per mode — only the constants differ.
  */
 export function LeftChrome(): React.ReactElement {
+  const t = useT()
   const shell = useShell((s) => s.shell)
   const patchShell = useShell((s) => s.patchShell)
   const vertical = shell.tabMode === 'vertical'
@@ -46,7 +49,7 @@ export function LeftChrome(): React.ReactElement {
           <button
             key={b.id}
             className="railbtn"
-            title={b.label}
+            title={t(b.labelKey)}
             aria-pressed={shell.railPanel === b.id && shell.railExpanded}
             onClick={() => openPanel(b.id)}
           >
@@ -57,7 +60,7 @@ export function LeftChrome(): React.ReactElement {
         {vertical && (
           <button
             className="railbtn"
-            title="新しいタブ (Ctrl+T)"
+            title={t('tab.new_tip')}
             onClick={() => send('tab.create', {})}
           >
             <Icon name="plus" size={17} />
@@ -82,6 +85,7 @@ function PanelFor({ panel }: { panel: RailPanel }): React.ReactElement | null {
 
 /** The vertical tab list: the only layout where a tab can show words. */
 function VerticalTabList(): React.ReactElement {
+  const t = useT()
   const tabs = useTabs((s) => s.tabs)
   const order = useTabs((s) => s.order)
   const groups = useTabs((s) => s.groups)
@@ -98,7 +102,7 @@ function VerticalTabList(): React.ReactElement {
   return (
     <div className="panel">
       <div className="vlist" style={{ paddingTop: 6 }}>
-        {pinned.length > 0 && <div className="vhead">ピン留め</div>}
+        {pinned.length > 0 && <div className="vhead">{t('vtabs.pinned')}</div>}
         {pinned.map((t) => (
           <Row
             key={t.id}
@@ -109,9 +113,7 @@ function VerticalTabList(): React.ReactElement {
             color={groups.find((g) => g.id === t.groupId)?.color}
           />
         ))}
-        <div className="vhead">
-          重要度順 · {rest.length} タブ
-        </div>
+        <div className="vhead">{t('vtabs.importance', { n: rest.length })}</div>
         {rest.map((t) => (
           <Row
             key={t.id}
@@ -140,6 +142,7 @@ function Row({
   onCheck: (id: string) => void
   color?: string | undefined
 }): React.ReactElement {
+  const t = useT()
   return (
     <button
       className="vtab"
@@ -159,9 +162,9 @@ function Row({
       <span style={{ opacity: checked ? 1 : 0.28, flex: 'none', color: 'var(--accent)' }}>
         <Icon name="check" size={12} />
       </span>
-      <span className="label">{tab.title || '新しいタブ'}</span>
+      <span className="label">{tab.title || t('tab.new')}</span>
       {tab.asleep ? (
-        <span className="meta" title="休眠中">
+        <span className="meta" title={t('vtabs.asleep')}>
           zzz
         </span>
       ) : tab.activeSeconds > 60 ? (

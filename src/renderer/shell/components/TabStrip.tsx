@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { send } from '../../shared/api'
 import { Icon } from '../../shared/Icon'
+import { useT } from '../../shared/store/locale'
 import { groupColorVar, useTabs } from '../../shared/store/tabs'
 import type { TabGroup, TabId, TabModel } from '@shared/types'
 
@@ -9,6 +10,7 @@ import type { TabGroup, TabId, TabModel } from '@shared/types'
  * group renders as a coloured header chip followed by its tabs.
  */
 export function TabStrip(): React.ReactElement {
+  const t = useT()
   const tabs = useTabs((s) => s.tabs)
   const order = useTabs((s) => s.order)
   const groups = useTabs((s) => s.groups)
@@ -46,7 +48,7 @@ export function TabStrip(): React.ReactElement {
   return (
     <div className="tabstrip a-tabs" role="tablist">
       {rows}
-      <button className="newtab" title="新しいタブ (Ctrl+T)" onClick={() => send('tab.create', {})}>
+      <button className="newtab" title={t('tab.new_tip')} onClick={() => send('tab.create', {})}>
         <Icon name="plus" size={14} />
       </button>
     </div>
@@ -54,11 +56,12 @@ export function TabStrip(): React.ReactElement {
 }
 
 function GroupTag({ group }: { group: TabGroup }): React.ReactElement {
+  const t = useT()
   return (
     <button
       className="grouptag"
       style={{ ['--gc' as string]: groupColorVar(group.color) }}
-      title={group.collapsed ? 'グループを展開' : 'グループを折りたたむ'}
+      title={t(group.collapsed ? 'tab.group_expand' : 'tab.group_collapse')}
       onClick={() => send('group.setCollapsed', { groupId: group.id, collapsed: !group.collapsed })}
     >
       <Icon name={group.collapsed ? 'chevronRight' : 'chevron'} size={11} />
@@ -80,6 +83,7 @@ function Tab({
   dragOver: boolean
   onDragOver: (id: TabId | null) => void
 }): React.ReactElement {
+  const t = useT()
   const order = useTabs((s) => s.order)
 
   return (
@@ -126,12 +130,12 @@ function Tab({
           <Icon name={tab.asleep ? 'sleep' : 'panel'} size={13} />
         </span>
       )}
-      {!tab.pinned && <span className="label">{tab.title || '新しいタブ'}</span>}
-      {tab.audible && !tab.pinned && <span title="音声再生中">♪</span>}
+      {!tab.pinned && <span className="label">{tab.title || t('tab.new')}</span>}
+      {tab.audible && !tab.pinned && <span title={t('tab.audible')}>♪</span>}
       {!tab.pinned && (
         <button
           className="close"
-          title="タブを閉じる (Ctrl+W)"
+          title={t('tab.close_tip')}
           onClick={(e) => {
             e.stopPropagation()
             send('tab.close', { tabId: tab.id })

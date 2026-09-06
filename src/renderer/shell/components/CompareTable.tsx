@@ -1,6 +1,7 @@
 import type { CompareResult } from '@shared/types'
 import { send } from '../../shared/api'
 import { hostOf } from '../../shared/format'
+import { useT } from '../../shared/store/locale'
 
 /**
  * Live views plus a generated table (blueprint L5-S4): a table alone cannot be
@@ -13,13 +14,14 @@ export function CompareTable({
   result: CompareResult
   onDismiss: () => void
 }): React.ReactElement {
+  const t = useT()
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px' }}>
-        <strong style={{ fontSize: 12 }}>比較表</strong>
+        <strong style={{ fontSize: 12 }}>{t('compare.title')}</strong>
         <span style={{ flex: 1 }} />
         <button className="chip" onClick={onDismiss}>
-          閉じる
+          {t('common.close')}
         </button>
       </div>
 

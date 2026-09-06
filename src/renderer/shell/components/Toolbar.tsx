@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { api, send } from '../../shared/api'
 import { Icon } from '../../shared/Icon'
 import { on } from '../../shared/bus'
+import { useT } from '../../shared/store/locale'
 import { useShell } from '../../shared/store/shell'
 import { useTabs } from '../../shared/store/tabs'
 
 export function Toolbar(): React.ReactElement {
+  const t = useT()
   const active = useTabs((s) => (s.activeTabId ? s.tabs[s.activeTabId] : undefined))
   const order = useTabs((s) => s.order)
   const shell = useShell((s) => s.shell)
@@ -76,7 +78,7 @@ export function Toolbar(): React.ReactElement {
     <div className="toolbar a-tool">
       <button
         className="iconbtn"
-        title="戻る (Alt+←)"
+        title={t('toolbar.back')}
         disabled={!active?.canGoBack}
         onClick={() => active && send('tab.goBack', { tabId: active.id })}
       >
@@ -84,7 +86,7 @@ export function Toolbar(): React.ReactElement {
       </button>
       <button
         className="iconbtn"
-        title="進む (Alt+→)"
+        title={t('toolbar.forward')}
         disabled={!active?.canGoForward}
         onClick={() => active && send('tab.goForward', { tabId: active.id })}
       >
@@ -92,7 +94,7 @@ export function Toolbar(): React.ReactElement {
       </button>
       <button
         className="iconbtn"
-        title={busy ? '停止 (Esc)' : '再読み込み'}
+        title={busy ? t('toolbar.stop') : t('toolbar.reload')}
         disabled={!active?.url && !busy}
         onClick={() =>
           active && (busy ? send('tab.stop', { tabId: active.id }) : send('tab.reload', { tabId: active.id }))
@@ -109,7 +111,7 @@ export function Toolbar(): React.ReactElement {
           ref={inputRef}
           value={draft}
           spellCheck={false}
-          placeholder="URL を入力、または検索"
+          placeholder={t('toolbar.omnibox')}
           onChange={(e) => {
             setDraft(e.target.value)
             if (!composing) requestSuggest(e.target.value)
@@ -134,13 +136,13 @@ export function Toolbar(): React.ReactElement {
             }
           }}
         />
-        {composing && <span className="composing">変換中</span>}
+        {composing && <span className="composing">{t('toolbar.composing')}</span>}
       </div>
 
       <button
         className="iconbtn"
         aria-pressed={active?.focusMode ?? false}
-        title="集中モード — 不要な要素を隠す"
+        title={t('toolbar.focus')}
         disabled={!active?.url}
         onClick={() =>
           active && send('focus.set', { tabId: active.id, enabled: !active.focusMode })
@@ -151,14 +153,14 @@ export function Toolbar(): React.ReactElement {
       <button
         className="iconbtn"
         aria-pressed={shell.splitRatio.length > 1}
-        title="分割画面"
+        title={t('toolbar.split')}
         onClick={toggleSplit}
       >
         <Icon name="split" />
       </button>
       <button
         className="iconbtn"
-        title="コマンドパレット (Ctrl+K)"
+        title={t('toolbar.palette')}
         onClick={() => void api.invoke('overlay.open', { mode: 'palette', anchor: null, query: '' })}
       >
         <Icon name="menu" />
@@ -166,7 +168,7 @@ export function Toolbar(): React.ReactElement {
       <button
         className="iconbtn"
         aria-pressed={shell.aiOpen}
-        title="AIパネル (Ctrl+Shift+K)"
+        title={t('titlebar.ai_panel')}
         onClick={() => patchShell({ aiOpen: !shell.aiOpen })}
       >
         <Icon name="panel" />

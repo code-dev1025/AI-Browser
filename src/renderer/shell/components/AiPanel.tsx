@@ -3,12 +3,14 @@ import { send } from '../../shared/api'
 import { on } from '../../shared/bus'
 import { hostOf } from '../../shared/format'
 import { useAi } from '../../shared/store/ai'
+import { useT } from '../../shared/store/locale'
 import { useShell } from '../../shared/store/shell'
 import { useTabs } from '../../shared/store/tabs'
 import { useUi } from '../../shared/store/ui'
 import { CompareTable } from './CompareTable'
 
 export function AiPanel(): React.ReactElement {
+  const t = useT()
   const ai = useAi()
   const activeTabId = useTabs((s) => s.activeTabId)
   const order = useTabs((s) => s.order)
@@ -55,18 +57,19 @@ export function AiPanel(): React.ReactElement {
           aria-pressed={ai.scope === 'page'}
           onClick={() => ai.setScope('page')}
         >
-          このページ
+          {t('ai.scope_page')}
         </button>
         <button
           className="chip"
           aria-pressed={ai.scope === 'tabs'}
           onClick={() => ai.setScope('tabs')}
-          title="開いているタブを横断して質問します"
+          title={t('ai.scope_tabs_tip')}
         >
-          全タブ{selection.length > 0 ? ` (${selection.length})` : ''}
+          {t('ai.scope_tabs')}
+          {selection.length > 0 ? ` (${selection.length})` : ''}
         </button>
         <span className="grow" />
-        <button className="chip" title="AIパネルを閉じる" onClick={() => patchShell({ aiOpen: false })}>
+        <button className="chip" title={t('ai.close_panel')} onClick={() => patchShell({ aiOpen: false })}>
           ×
         </button>
       </header>
@@ -77,26 +80,26 @@ export function AiPanel(): React.ReactElement {
           disabled={ai.working !== null}
           onClick={() => void ai.runOrganize(targetTabs())}
         >
-          {ai.working === 'organize' ? '整理中…' : 'タブ自動整理'}
+          {t(ai.working === 'organize' ? 'ai.organizing' : 'ai.organize')}
         </button>
         <button
           className="chip"
           disabled={ai.working !== null}
           onClick={() => void ai.runSummaries(targetTabs())}
         >
-          {ai.working === 'summaries' ? '要約中…' : '一括要約'}
+          {t(ai.working === 'summaries' ? 'ai.summarizing' : 'ai.summarize')}
         </button>
         <button
           className="chip"
           disabled={ai.working !== null || targetTabs().length < 2}
-          title="2つ以上のタブを選ぶと比較できます"
+          title={t('ai.compare_tip')}
           onClick={() => void ai.runCompare(targetTabs().slice(0, 4))}
         >
-          {ai.working === 'compare' ? '比較中…' : '比較'}
+          {t(ai.working === 'compare' ? 'ai.comparing' : 'ai.compare')}
         </button>
         {selection.length > 0 && (
           <button className="chip" onClick={clearSelection}>
-            選択解除
+            {t('ai.clear_selection')}
           </button>
         )}
       </div>
@@ -104,29 +107,28 @@ export function AiPanel(): React.ReactElement {
       <div className="body" ref={bodyRef}>
         {backend.mode === 'mock' && ai.messages.length === 0 && (
           <p className="empty">
-            バックエンド未接続です。
+            {t('ai.mock_notice_1')}
             <br />
-            いまは抽出結果をそのまま返すモック応答が返ります。
-            <br />
-            <code style={{ fontSize: 11 }}>AI_BACKEND_URL</code> を設定すると実APIに切り替わります。
+            {t('ai.mock_notice_2')}
           </p>
         )}
 
         {ai.organize.length > 0 && (
           <div className="card" style={{ gap: 8 }}>
-            <strong style={{ fontSize: 12 }}>グループ提案</strong>
+            <strong style={{ fontSize: 12 }}>{t('ai.suggest_groups')}</strong>
             {ai.organize.map((s) => (
               <div key={s.groupName} style={{ fontSize: 12, color: 'var(--fg-2)' }}>
-                <b style={{ color: `var(--g-${s.color})` }}>{s.groupName}</b> — {s.tabIds.length} タブ
+                <b style={{ color: `var(--g-${s.color})` }}>{s.groupName}</b> —{' '}
+                {t('common.tabs', { n: s.tabIds.length })}
                 <div style={{ fontSize: 11, color: 'var(--fg-3)' }}>{s.reason}</div>
               </div>
             ))}
             <div style={{ display: 'flex', gap: 6 }}>
               <button className="btn primary" onClick={() => void ai.applyOrganize()}>
-                この分類を適用
+                {t('ai.apply_groups')}
               </button>
               <button className="btn" onClick={() => ai.dismiss('organize')}>
-                やめる
+                {t('common.cancel')}
               </button>
             </div>
           </div>
@@ -137,10 +139,10 @@ export function AiPanel(): React.ReactElement {
         {ai.summaries.length > 0 && (
           <div className="card" style={{ gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <strong style={{ fontSize: 12 }}>まとめ · {ai.summaries.length} ページ</strong>
+              <strong style={{ fontSize: 12 }}>{t('ai.summaries', { n: ai.summaries.length })}</strong>
               <span style={{ flex: 1 }} />
               <button className="chip" onClick={() => ai.dismiss('summaries')}>
-                閉じる
+                {t('common.close')}
               </button>
             </div>
             {ai.summaries.map((s) => (
@@ -150,7 +152,9 @@ export function AiPanel(): React.ReactElement {
                   style={{ width: '100%' }}
                   onClick={() => send('tab.activate', { tabId: s.tabId })}
                 >
-                  <b>{hostOf(s.url)} · 約{s.readingMinutes}分</b>
+                  <b>
+                    {hostOf(s.url)} · {t('ai.reading_minutes', { n: s.readingMinutes })}
+                  </b>
                   {s.title}
                 </button>
                 <ul style={{ margin: '4px 0 0', paddingLeft: 16, color: 'var(--fg-2)' }}>
@@ -165,11 +169,13 @@ export function AiPanel(): React.ReactElement {
 
         {ai.messages.map((m) => (
           <div key={m.id} className={`msg ${m.role}`}>
-            <span className="who">{m.role === 'user' ? 'あなた' : 'AI'}</span>
+            <span className="who">{m.role === 'user' ? t('ai.you') : 'AI'}</span>
             <div className="bubble">
               {m.text}
               {m.streaming && <span style={{ opacity: 0.5 }}>▌</span>}
-              {m.error && <span style={{ color: 'var(--seal)' }}>エラー: {m.error}</span>}
+              {m.error && (
+                <span style={{ color: 'var(--seal)' }}>{t('ai.error', { message: m.error })}</span>
+              )}
             </div>
             {m.citations.length > 0 && (
               <div className="cites">
@@ -194,7 +200,7 @@ export function AiPanel(): React.ReactElement {
         <div className="composer">
           <textarea
             value={draft}
-            placeholder={ai.scope === 'tabs' ? '全タブに質問…' : 'このページに質問…'}
+            placeholder={t(ai.scope === 'tabs' ? 'ai.placeholder_tabs' : 'ai.placeholder_page')}
             onChange={(e) => setDraft(e.target.value)}
             onCompositionStart={() => setComposing(true)}
             onCompositionEnd={() => setComposing(false)}
@@ -208,11 +214,11 @@ export function AiPanel(): React.ReactElement {
           />
           {ai.busy ? (
             <button className="btn danger" onClick={ai.cancel}>
-              停止
+              {t('common.stop')}
             </button>
           ) : (
             <button className="btn primary" onClick={submit} disabled={!draft.trim()}>
-              送信
+              {t('common.send')}
             </button>
           )}
         </div>
