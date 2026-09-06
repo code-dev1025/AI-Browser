@@ -425,9 +425,12 @@
   overflow: hidden;
 }
 
+/* Icon bar and tab list sit side by side, the same composition as the
+   horizontal-mode rail: 52px of icons + the rest for the list. Stacking them
+   left the icons on their own indent, out of line with the rows below. */
 .vtabs {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   background: var(--bg-2);
   border-right: 1px solid var(--line);
   overflow: hidden;

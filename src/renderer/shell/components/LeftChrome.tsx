@@ -43,7 +43,7 @@ export function LeftChrome(): React.ReactElement {
   const showContent = shell.railExpanded && (panelBody !== null || vertical)
 
   return (
-    <div className={`${vertical ? 'vtabs' : 'rail'} a-left`} style={{ display: 'flex' }}>
+    <div className={`${vertical ? 'vtabs' : 'rail'} a-left`}>
       <nav className="railbar">
         {BUTTONS.map((b) => (
           <button
