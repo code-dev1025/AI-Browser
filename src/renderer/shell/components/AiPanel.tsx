@@ -213,11 +213,11 @@ export function AiPanel(): React.ReactElement {
             }}
           />
           {ai.busy ? (
-            <button className="btn danger" onClick={ai.cancel}>
+            <button className="btn danger send" onClick={ai.cancel}>
               {t('common.stop')}
             </button>
           ) : (
-            <button className="btn primary" onClick={submit} disabled={!draft.trim()}>
+            <button className="btn primary send" onClick={submit} disabled={!draft.trim()}>
               {t('common.send')}
             </button>
           )}
