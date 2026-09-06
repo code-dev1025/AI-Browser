@@ -9,9 +9,11 @@
  */
 
 import type {
+  AppSettings,
   AskRequest,
   AskResult,
   BackendStatus,
+  Locale,
   CompareResult,
   ExtractedPage,
   ExtractSchema,
@@ -43,12 +45,18 @@ export interface AppSnapshot {
   shell: ShellState
   window: WindowMetrics
   backend: BackendStatus
+  settings: AppSettings
 }
 
 export interface Commands {
   /* --- lifecycle ------------------------------------------------- */
   'app.snapshot': { req: void; res: AppSnapshot }
   'app.backendStatus': { req: void; res: BackendStatus }
+
+  /* --- settings ---------------------------------------------------- */
+  'settings.get': { req: void; res: AppSettings }
+  /** Main owns the locale so its own toasts and mock answers match the UI. */
+  'settings.setLocale': { req: { locale: Locale }; res: AppSettings }
 
   /* --- window ---------------------------------------------------- */
   'window.minimize': { req: void; res: void }
@@ -165,6 +173,7 @@ export interface Events {
   'history:added': HistoryEntry
   'notes:changed': Note[]
   'backend:status': BackendStatus
+  'settings:changed': AppSettings
   'toast': { kind: 'info' | 'success' | 'error'; message: string }
 }
 

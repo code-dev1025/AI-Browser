@@ -3,6 +3,15 @@
  * Keep this file pure — no imports from electron, no DOM types.
  */
 
+import type { MessageKey } from './i18n'
+
+export type Locale = 'ja' | 'en'
+
+/** Persisted in main, mirrored into both renderers. */
+export interface AppSettings {
+  locale: Locale
+}
+
 export type TabId = string
 export type GroupId = string
 export type WorkspaceId = string
@@ -254,10 +263,11 @@ export interface OverlayPayload {
 
 export interface PaletteCommand {
   id: string
-  title: string
-  hint: string | null
+  /** Message keys, not text — the palette renders in the viewer's language. */
+  titleKey: MessageKey
+  hintKey: MessageKey | null
   shortcut: string | null
-  group: string
+  groupKey: MessageKey
 }
 
 export interface FindState {
