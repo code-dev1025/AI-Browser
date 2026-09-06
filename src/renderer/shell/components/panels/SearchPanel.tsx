@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { send } from '../../../shared/api'
 import { clockTime, shortUrl } from '../../../shared/format'
 import { useLibrary } from '../../../shared/store/library'
+import { useLocale, useT } from '../../../shared/store/locale'
 import { useUi } from '../../../shared/store/ui'
 
 /**
@@ -10,6 +11,8 @@ import { useUi } from '../../../shared/store/ui'
  * same call returns semantic hits and nothing here changes.
  */
 export function SearchPanel(): React.ReactElement {
+  const t = useT()
+  const locale = useLocale()
   const hits = useLibrary((s) => s.searchHits)
   const searching = useLibrary((s) => s.searching)
   const search = useLibrary((s) => s.search)
@@ -21,14 +24,14 @@ export function SearchPanel(): React.ReactElement {
   return (
     <div className="panel">
       <header>
-        <h2>曖昧タブ検索</h2>
+        <h2>{t('search.title')}</h2>
       </header>
 
       <div className="foot" style={{ borderTop: 0, borderBottom: '1px solid var(--line-soft)' }}>
         <input
           className="field"
           value={query}
-          placeholder="昨日見た赤いバッグのページ…"
+          placeholder={t('search.placeholder')}
           onChange={(e) => setQuery(e.target.value)}
           onCompositionStart={() => setComposing(true)}
           onCompositionEnd={() => setComposing(false)}
@@ -40,12 +43,10 @@ export function SearchPanel(): React.ReactElement {
       </div>
 
       <div className="body">
-        {searching && <p className="empty">検索中…</p>}
+        {searching && <p className="empty">{t('search.searching')}</p>}
         {!searching && hits.length === 0 && (
           <p className="empty">
-            {backend.mode === 'mock'
-              ? 'キーワード一致で検索します。\nバックエンド接続後は意味検索になります。'
-              : '該当するページはありません。'}
+            {t(backend.mode === 'mock' ? 'search.empty_mock' : 'search.empty')}
           </p>
         )}
         {hits.map((h) => (
@@ -66,7 +67,7 @@ export function SearchPanel(): React.ReactElement {
                 </span>
               )}
             </span>
-            {h.visitedAt && <time>{clockTime(h.visitedAt)}</time>}
+            {h.visitedAt && <time>{clockTime(h.visitedAt, locale)}</time>}
           </button>
         ))}
       </div>

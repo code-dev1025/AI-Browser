@@ -3,6 +3,7 @@ import type { HistoryEntry, OverlayPayload, PaletteCommand } from '@shared/types
 import { api } from '../shared/api'
 import { Icon } from '../shared/Icon'
 import { COMMANDS } from '../shared/commands'
+import { bindLocale, useT } from '../shared/store/locale'
 import { shortUrl } from '../shared/format'
 
 /**
@@ -16,6 +17,8 @@ export function App(): React.ReactElement | null {
   const [payload, setPayload] = useState<OverlayPayload>({ mode: null, anchor: null, query: '' })
 
   useEffect(() => api.on('overlay:payload', setPayload), [])
+  // The overlay is its own React root, so it binds to the language itself.
+  useEffect(() => bindLocale(), [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -45,6 +48,7 @@ function useReportHeight(ref: React.RefObject<HTMLElement | null>, deps: unknown
 /* ------------------------------------------------------------------ */
 
 function Palette(): React.ReactElement {
+  const t = useT()
   const [query, setQuery] = useState('')
   const [index, setIndex] = useState(0)
   const [composing, setComposing] = useState(false)
@@ -54,8 +58,8 @@ function Palette(): React.ReactElement {
 
   const q = query.trim().toLowerCase()
   const matches: PaletteCommand[] = q
-    ? COMMANDS.filter(
-        (c) => c.title.toLowerCase().includes(q) || (c.hint ?? '').toLowerCase().includes(q)
+    ? COMMANDS.filter((c) =>
+        `${t(c.titleKey)} ${c.hintKey ? t(c.hintKey) : ''}`.toLowerCase().includes(q)
       )
     : COMMANDS
 
@@ -71,7 +75,7 @@ function Palette(): React.ReactElement {
         <input
           ref={inputRef}
           value={query}
-          placeholder="コマンドを検索…"
+          placeholder={t('palette.placeholder')}
           onChange={(e) => {
             setQuery(e.target.value)
             setIndex(0)
@@ -97,23 +101,23 @@ function Palette(): React.ReactElement {
         <div className="plist">
           {matches.length === 0 && (
             <div className="pgroup" style={{ padding: 16 }}>
-              一致するコマンドがありません
+              {t('palette.no_match')}
             </div>
           )}
           {matches.map((c, i) => {
-            const header = c.group !== lastGroup && !q
-            lastGroup = c.group
+            const header = c.groupKey !== lastGroup && !q
+            lastGroup = c.groupKey
             return (
               <div key={c.id}>
-                {header && <div className="pgroup">{c.group}</div>}
+                {header && <div className="pgroup">{t(c.groupKey)}</div>}
                 <button
                   className="prow"
                   data-active={i === index}
                   onPointerEnter={() => setIndex(i)}
                   onClick={() => run(c.id)}
                 >
-                  <span className="t">{c.title}</span>
-                  {c.hint && <span className="h">{c.hint}</span>}
+                  <span className="t">{t(c.titleKey)}</span>
+                  {c.hintKey && <span className="h">{t(c.hintKey)}</span>}
                   {c.shortcut && <kbd>{c.shortcut}</kbd>}
                 </button>
               </div>
@@ -173,6 +177,7 @@ function UrlSuggest({ query }: { query: string }): React.ReactElement | null {
 /* ------------------------------------------------------------------ */
 
 function FindBar(): React.ReactElement {
+  const t = useT()
   const [query, setQuery] = useState('')
   const [composing, setComposing] = useState(false)
   const [state, setState] = useState({ matches: 0, activeMatch: 0 })
@@ -193,7 +198,7 @@ function FindBar(): React.ReactElement {
       <input
         ref={inputRef}
         value={query}
-        placeholder="ページ内を検索"
+        placeholder={t('find.placeholder')}
         onChange={(e) => {
           if (composing) return setQuery(e.target.value)
           search(e.target.value)
@@ -211,14 +216,14 @@ function FindBar(): React.ReactElement {
       <span className="count">
         {state.matches > 0 ? `${state.activeMatch}/${state.matches}` : query ? '0' : ''}
       </span>
-      <button title="前へ" onClick={() => search(query, false)}>
+      <button title={t('find.prev')} onClick={() => search(query, false)}>
         <Icon name="chevron" size={13} />
       </button>
-      <button title="次へ" onClick={() => search(query, true)}>
+      <button title={t('find.next')} onClick={() => search(query, true)}>
         <Icon name="chevronRight" size={13} />
       </button>
       <button
-        title="閉じる"
+        title={t('common.close')}
         onClick={() => {
           void api.invoke('find.stop')
           void api.invoke('overlay.close')

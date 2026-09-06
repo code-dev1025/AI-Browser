@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useLibrary } from '../../../shared/store/library'
+import { useLocale, useT } from '../../../shared/store/locale'
 import { useTabs } from '../../../shared/store/tabs'
 import { dayLabel } from '../../../shared/format'
 
 /** Save the whole working set — tabs, order, groups, layout — and bring it back. */
 export function WorkspacePanel(): React.ReactElement {
+  const t = useT()
+  const locale = useLocale()
   const workspaces = useLibrary((s) => s.workspaces)
   const load = useLibrary((s) => s.loadWorkspaces)
   const save = useLibrary((s) => s.saveWorkspace)
@@ -21,7 +24,7 @@ export function WorkspacePanel(): React.ReactElement {
 
   const suggestion = (): string => {
     const d = new Date()
-    return `作業 ${d.getMonth() + 1}/${d.getDate()}`
+    return t('ws.default_name', { month: d.getMonth() + 1, day: d.getDate() })
   }
 
   const doSave = async (): Promise<void> => {
@@ -32,34 +35,34 @@ export function WorkspacePanel(): React.ReactElement {
   return (
     <div className="panel">
       <header>
-        <h2>ワークスペース</h2>
+        <h2>{t('ws.title')}</h2>
         <span className="grow" />
-        <span className="badge">{tabCount} タブ</span>
+        <span className="badge">{t('common.tabs', { n: tabCount })}</span>
       </header>
 
       <div className="body">
         {workspaces.length === 0 && (
-          <p className="empty">
-            今の作業状態をまるごと保存しておくと、
-            <br />
-            あとで同じ並びのまま復元できます。
-          </p>
+          <p className="empty">{t('ws.empty')}</p>
         )}
         {[...workspaces].reverse().map((w) => (
           <div key={w.id} className="card" style={{ gap: 6 }}>
             <div className="t">{w.name}</div>
             <div className="d">
-              {w.tabs.length} タブ · {w.groups.length} グループ · {dayLabel(w.createdAt)}
+              {t('ws.meta', {
+                tabs: w.tabs.length,
+                groups: w.groups.length,
+                when: dayLabel(w.createdAt, locale)
+              })}
             </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <button className="chip" onClick={() => void restore(w.id, false)}>
-                追加で開く
+                {t('ws.restore_add')}
               </button>
               <button className="chip" onClick={() => void restore(w.id, true)}>
-                置き換えて復元
+                {t('ws.restore_replace')}
               </button>
               <button className="chip" onClick={() => void remove(w.id)}>
-                削除
+                {t('common.delete')}
               </button>
             </div>
           </div>
@@ -80,7 +83,7 @@ export function WorkspacePanel(): React.ReactElement {
           }}
         />
         <button className="btn primary" onClick={() => void doSave()}>
-          保存
+          {t('common.save')}
         </button>
       </div>
     </div>

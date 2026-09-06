@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { api } from '../../../shared/api'
 import { shortUrl } from '../../../shared/format'
 import { useLibrary } from '../../../shared/store/library'
+import { useT } from '../../../shared/store/locale'
 import { useTabs } from '../../../shared/store/tabs'
 import { useUi } from '../../../shared/store/ui'
 
 export function NotesPanel(): React.ReactElement {
+  const t = useT()
   const notes = useLibrary((s) => s.notes)
   const loadNotes = useLibrary((s) => s.loadNotes)
   const addNote = useLibrary((s) => s.addNote)
@@ -39,26 +41,22 @@ export function NotesPanel(): React.ReactElement {
     const note = await api.invoke('notes.captureHighlight', { tabId: active.id })
     if (!note) return
     await loadNotes()
-    pushToast('success', 'ハイライトを保存しました')
+    pushToast('success', t('toast.highlight_saved'))
   }
 
   return (
     <div className="panel">
       <header>
-        <h2>メモ・ハイライト</h2>
+        <h2>{t('notes.title')}</h2>
         <span className="grow" />
         <button className="chip" onClick={() => void captureHighlight()} disabled={!active?.url}>
-          選択範囲を保存
+          {t('notes.capture')}
         </button>
       </header>
 
       <div className="body">
         {notes.length === 0 && (
-          <p className="empty">
-            ページ上でテキストを選択し「選択範囲を保存」を押すと
-            <br />
-            ハイライトとして知識庫に残ります。
-          </p>
+          <p className="empty">{t('notes.empty')}</p>
         )}
         {[...notes].reverse().map((n) => (
           <div key={n.id} className="card" style={{ gap: 6 }}>
@@ -67,15 +65,15 @@ export function NotesPanel(): React.ReactElement {
               {n.text}
               {n.kind === 'highlight' ? '”' : ''}
             </div>
-            <div className="d">{n.url ? shortUrl(n.url) : 'ページ指定なし'}</div>
+            <div className="d">{n.url ? shortUrl(n.url) : t('notes.no_page')}</div>
             <div style={{ display: 'flex', gap: 6 }}>
               {n.url && (
                 <button className="chip" onClick={() => api.invoke('tab.create', { url: n.url })}>
-                  開く
+                  {t('common.open')}
                 </button>
               )}
               <button className="chip" onClick={() => void removeNote(n.id)}>
-                削除
+                {t('common.delete')}
               </button>
             </div>
           </div>
@@ -87,7 +85,7 @@ export function NotesPanel(): React.ReactElement {
           className="field"
           style={{ height: 56, padding: 6, resize: 'none' }}
           value={draft}
-          placeholder="メモを追加…"
+          placeholder={t('notes.placeholder')}
           onChange={(e) => setDraft(e.target.value)}
           onCompositionStart={() => setComposing(true)}
           onCompositionEnd={() => setComposing(false)}
@@ -97,7 +95,7 @@ export function NotesPanel(): React.ReactElement {
           }}
         />
         <button className="btn" style={{ marginTop: 6 }} onClick={() => void saveNote()}>
-          保存 (Ctrl+Enter)
+          {t('notes.save_hint')}
         </button>
       </div>
     </div>
