@@ -5,6 +5,7 @@ import { registerIpc } from './ipc'
 import { hardenSession, setContentPreloadPath } from './security'
 import { initSnapshots, registerSnapshotScheme } from './snapshots'
 import { initBackend, backendStatus } from './api'
+import { initSettings, tm } from './settings'
 
 // Must run before the app is ready: privileged schemes are registered once.
 registerSnapshotScheme()
@@ -27,12 +28,17 @@ if (!gotLock) {
 
   void app.whenReady().then(async () => {
     initSnapshots()
+    // Settings first: everything below can produce user-visible text.
+    initSettings()
     setContentPreloadPath(join(__dirname, '../preload/content.js'))
 
     const session = hardenSession((ask) => {
       // Permissions are denied by default; the shell shows what was blocked.
       ask.allow(false)
-      appWindow?.toast('info', `${ask.permission} の要求をブロックしました (${ask.origin})`)
+      appWindow?.toast(
+        'info',
+        tm('toast.permission_blocked', { permission: ask.permission, origin: ask.origin })
+      )
     })
 
     await initBackend()
@@ -51,12 +57,9 @@ if (!gotLock) {
 
     const status = backendStatus()
     if (status.mode === 'mock') {
-      appWindow.toast(
-        'info',
-        'バックエンド未接続 — AI機能はモック応答です (AI_BACKEND_URL で切替)'
-      )
+      appWindow.toast('info', tm('toast.backend_mock'))
     } else if (!status.reachable) {
-      appWindow.toast('error', `バックエンドに接続できません: ${status.baseUrl}`)
+      appWindow.toast('error', tm('toast.backend_down', { url: status.baseUrl ?? '' }))
     }
 
     setInterval(() => appWindow?.tabs.sweepIdle(IDLE_SLEEP_MINUTES, KEEP_AWAKE), 60_000)

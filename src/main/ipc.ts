@@ -23,6 +23,8 @@ import type { AppWindow } from './AppWindow'
 import { JsonStore, newId } from './store'
 import { backend, backendStatus, recheckBackend } from './api'
 import { hostLabel } from './urls'
+import { locale, setLocale, settings, tm } from './settings'
+import { LOCALE_LABEL } from '@shared/i18n'
 
 const HISTORY_CAP = 8000
 
@@ -170,10 +172,22 @@ export function registerIpc(win: AppWindow): void {
     activeTabId: win.tabs.activeTabId,
     shell: win.shell,
     window: win.metrics,
-    backend: backendStatus()
+    backend: backendStatus(),
+    settings: settings()
   }))
 
   handle('app.backendStatus', () => recheckBackend())
+
+  handle('settings.get', () => settings())
+
+  handle('settings.setLocale', (p) => {
+    if (p.locale === locale()) return settings()
+    const next = setLocale(p.locale)
+    // Both renderers listen: the shell and the overlay each hold a React root.
+    win.send('settings:changed', next)
+    win.toast('success', tm('toast.language', { lang: LOCALE_LABEL[next.locale] }))
+    return next
+  })
 
   handle('window.minimize', () => {
     win.win.minimize()
@@ -309,12 +323,12 @@ export function registerIpc(win: AppWindow): void {
     else await win.injection.disable(p.tabId, view.webContents)
     win.tabs.setFocusMode(p.tabId, p.enabled)
     const hidden = win.injection.report(p.tabId).length
-    win.toast('info', p.enabled ? `集中モード: ${hidden} 種類の要素を非表示` : '集中モードを解除')
+    win.toast('info', p.enabled ? tm('toast.focus_on', { n: hidden }) : tm('toast.focus_off'))
   })
 
   handle('focus.setGoal', (p) => {
     focusGoal = p.goal
-    win.toast('info', focusGoal ? `目的を設定: ${focusGoal}` : '目的をクリア')
+    win.toast('info', focusGoal ? tm('toast.goal_set', { goal: focusGoal }) : tm('toast.goal_clear'))
   })
 
   /* -------------------------------------------------------------- */
@@ -351,7 +365,7 @@ export function registerIpc(win: AppWindow): void {
         null,
         2000
       )
-      if (sel?.text) question = `${question}\n\n---\n選択範囲:\n${sel.text}`
+      if (sel?.text) question = `${question}\n\n---\n${tm('ai.selection_prefix')}\n${sel.text}`
     }
 
     const pages = await extractMany(tabIds, 'article')
@@ -392,7 +406,7 @@ export function registerIpc(win: AppWindow): void {
       const groupId = existing?.id ?? win.tabs.createGroup(s.groupName, s.color)
       for (const tabId of s.tabIds) win.tabs.setGroup(tabId, groupId)
     }
-    win.toast('success', `${p.suggestions.length} グループに整理しました`)
+    win.toast('success', tm('toast.organized', { n: p.suggestions.length }))
   })
 
   handle('ai.summarize', async (p) => {
@@ -461,7 +475,7 @@ export function registerIpc(win: AppWindow): void {
       }
     }
     workspaces.set([...workspaces.get(), snapshot])
-    win.toast('success', `ワークスペース「${p.name}」を保存しました`)
+    win.toast('success', tm('toast.ws_saved', { name: p.name }))
     return { id }
   })
 
@@ -480,7 +494,7 @@ export function registerIpc(win: AppWindow): void {
     }
     if (first) win.tabs.activate(first)
     win.setShellState(ws.shell)
-    win.toast('success', `「${ws.name}」を復元しました（${ws.tabs.length} タブ）`)
+    win.toast('success', tm('toast.ws_restored', { name: ws.name, n: ws.tabs.length }))
   })
 
   handle('workspace.remove', (p) => {
@@ -560,7 +574,7 @@ export function registerIpc(win: AppWindow): void {
       2000
     )
     if (!sel?.text) {
-      win.toast('info', 'ページ上でテキストを選択してから実行してください')
+      win.toast('info', tm('toast.select_text'))
       return null
     }
 
@@ -578,7 +592,7 @@ export function registerIpc(win: AppWindow): void {
     notes.set([...notes.get(), note])
     pushNotes()
     view.webContents.send(CONTENT_CHANNELS.highlightApply, {})
-    win.toast('success', 'ハイライトを保存しました')
+    win.toast('success', tm('toast.highlight_saved'))
     return note
   })
 }
