@@ -1,4 +1,6 @@
+import { LOCALES, LOCALE_LABEL, LOCALE_SHORT } from '@shared/i18n'
 import { useLibrary } from '../../shared/store/library'
+import { useLocaleStore, useT } from '../../shared/store/locale'
 import { useShell } from '../../shared/store/shell'
 import { useTabs } from '../../shared/store/tabs'
 import { useUi } from '../../shared/store/ui'
@@ -9,6 +11,7 @@ import { Icon } from '../../shared/Icon'
  * so this bar only reserves their width — see --wco-right in useBootstrap.
  */
 export function TitleBar(): React.ReactElement {
+  const t = useT()
   const tabCount = useTabs((s) => s.order.length)
   const sleeping = useTabs((s) => s.order.filter((id) => s.tabs[id]?.asleep).length)
   const backend = useUi((s) => s.backend)
@@ -17,8 +20,12 @@ export function TitleBar(): React.ReactElement {
   const patchShell = useShell((s) => s.patchShell)
 
   const badgeClass = backend.mode === 'mock' ? 'mock' : backend.reachable ? 'live' : 'down'
-  const badgeText =
-    backend.mode === 'mock' ? 'MOCK API' : backend.reachable ? 'API LIVE' : 'API DOWN'
+  const badgeKey =
+    backend.mode === 'mock'
+      ? 'titlebar.backend_mock'
+      : backend.reachable
+        ? 'titlebar.backend_live'
+        : 'titlebar.backend_down'
 
   return (
     <header className="titlebar a-title">
@@ -29,36 +36,71 @@ export function TitleBar(): React.ReactElement {
 
       <button
         className="badge"
-        title="タブ表示を切り替え (縦 / 横)"
+        title={t('titlebar.tabmode')}
         onClick={() => {
           const next = shell.tabMode === 'horizontal' ? 'vertical' : 'horizontal'
           // Vertical tabs are useless collapsed — open the sidebar with them.
           patchShell({ tabMode: next, railExpanded: next === 'vertical' ? true : shell.railExpanded })
         }}
       >
-        {shell.tabMode === 'horizontal' ? '横タブ' : '縦タブ'}
+        {t(shell.tabMode === 'horizontal' ? 'titlebar.mode_horizontal' : 'titlebar.mode_vertical')}
       </button>
 
       <span className="badge">
-        {tabCount} タブ{sleeping > 0 ? ` · ${sleeping} 休眠` : ''}
+        {t('common.tabs', { n: tabCount })}
+        {sleeping > 0 ? ` · ${t('titlebar.sleeping', { n: sleeping })}` : ''}
       </span>
 
-      {workspaces.length > 0 && <span className="badge">{workspaces.length} WS</span>}
+      {workspaces.length > 0 && (
+        <span className="badge">{t('titlebar.workspaces', { n: workspaces.length })}</span>
+      )}
 
       <div className="spacer" />
 
-      <span className={`badge ${badgeClass}`} title={backend.lastError ?? backend.baseUrl ?? 'モック応答'}>
-        {badgeText}
+      <LanguagePicker />
+
+      <span
+        className={`badge ${badgeClass}`}
+        title={backend.lastError ?? backend.baseUrl ?? t('titlebar.backend_mock_tip')}
+      >
+        {t(badgeKey)}
       </span>
 
       <button
         className="iconbtn"
         aria-pressed={shell.aiOpen}
-        title="AIパネル (Ctrl+Shift+K)"
+        title={t('titlebar.ai_panel')}
         onClick={() => patchShell({ aiOpen: !shell.aiOpen })}
       >
         <Icon name="ai" />
       </button>
     </header>
+  )
+}
+
+/**
+ * Both languages are always visible rather than hidden behind a single toggle:
+ * someone who cannot read the current interface still has to be able to find
+ * the way out of it.
+ */
+function LanguagePicker(): React.ReactElement {
+  const t = useT()
+  const locale = useLocaleStore((s) => s.locale)
+  const changeLocale = useLocaleStore((s) => s.changeLocale)
+
+  return (
+    <div className="langpicker" role="group" aria-label={t('titlebar.language')}>
+      {LOCALES.map((l) => (
+        <button
+          key={l}
+          type="button"
+          aria-pressed={l === locale}
+          title={`${t('titlebar.language')} — ${LOCALE_LABEL[l]}`}
+          onClick={() => changeLocale(l)}
+        >
+          {LOCALE_SHORT[l]}
+        </button>
+      ))}
+    </div>
   )
 }

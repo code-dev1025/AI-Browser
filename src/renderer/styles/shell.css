@@ -124,6 +124,33 @@
   border-color: color-mix(in srgb, var(--seal) 45%, transparent);
 }
 
+/* Language picker: both options always visible, so someone who cannot read
+   the current interface can still find the way out of it. */
+.langpicker {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  flex: none;
+}
+.langpicker button {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  padding: 2px 9px;
+  color: var(--fg-3);
+  line-height: 1.5;
+}
+.langpicker button:hover {
+  color: var(--fg);
+  background: var(--bg-3);
+}
+.langpicker button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-weight: 600;
+}
+
 /* ------------------------------------------------------------------ */
 /* Toolbar                                                             */
 /* ------------------------------------------------------------------ */
