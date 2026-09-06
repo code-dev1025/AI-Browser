@@ -74,11 +74,34 @@
 .titlebar .brand {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 11.5px;
-  letter-spacing: 0.04em;
-  color: var(--fg-2);
   -webkit-app-region: drag;
+  flex: none;
+}
+
+.brandlogo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.brandlogo svg {
+  display: block;
+  color: var(--fg-2);
+  flex: none;
+}
+
+/* Weight carries the lockup, not a second colour: the mark is already the only
+   saturated thing in the title bar. */
+.wordmark {
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+  color: var(--fg-2);
+  white-space: nowrap;
+}
+.wordmark b {
+  font-weight: 700;
+  color: var(--fg);
+  letter-spacing: 0.04em;
+  margin-right: 3px;
 }
 
 /* A status mark on a control, used only when something is wrong. */
@@ -96,17 +119,6 @@
   box-shadow: 0 0 0 2px var(--bg-2);
 }
 
-.titlebar .brand i {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--seal);
-}
-
-.titlebar .ws {
-  font-weight: 600;
-  color: var(--fg);
-}
 
 .titlebar .spacer {
   flex: 1;

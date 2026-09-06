@@ -4,6 +4,7 @@ import { useT } from '../../shared/store/locale'
 import { useShell } from '../../shared/store/shell'
 import { useUi } from '../../shared/store/ui'
 import { Icon } from '../../shared/Icon'
+import { BrandLogo } from '../../shared/BrandLogo'
 
 /**
  * The title bar carries identity, the two controls in constant use, and the
@@ -35,8 +36,7 @@ export function TitleBar(): React.ReactElement {
   return (
     <header className="titlebar a-title">
       <div className="brand">
-        <i />
-        <span className="ws">AI Browser</span>
+        <BrandLogo />
       </div>
 
       <div className="spacer" />
