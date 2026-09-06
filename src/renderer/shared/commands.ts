@@ -15,6 +15,7 @@ export const COMMANDS: PaletteCommand[] = [
   { id: 'split.toggle', titleKey: 'cmd.split', hintKey: null, shortcut: null, groupKey: 'cmdgroup.view' },
   { id: 'focus.toggle', titleKey: 'cmd.focus', hintKey: 'cmd.focus_hint', shortcut: null, groupKey: 'cmdgroup.view' },
   { id: 'ai.panel', titleKey: 'cmd.ai_panel', hintKey: null, shortcut: 'Ctrl+Shift+K', groupKey: 'cmdgroup.view' },
+  { id: 'settings.open', titleKey: 'cmd.settings', hintKey: null, shortcut: null, groupKey: 'cmdgroup.view' },
   { id: 'language.toggle', titleKey: 'cmd.language', hintKey: null, shortcut: null, groupKey: 'cmdgroup.view' },
   { id: 'ai.organize', titleKey: 'cmd.ai_organize', hintKey: 'cmd.ai_organize_hint', shortcut: null, groupKey: 'cmdgroup.ai' },
   { id: 'ai.summarize', titleKey: 'cmd.ai_summarize', hintKey: null, shortcut: null, groupKey: 'cmdgroup.ai' },

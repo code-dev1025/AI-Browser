@@ -192,8 +192,11 @@ export class AppWindow implements TabHost {
     const zero = { x: 0, y: 0, width: 0, height: 0 }
     if (!this.overlay.mode) return zero
 
-    // The palette is modal: it owns the window and takes focus.
-    if (this.overlay.mode === 'palette') return { x: 0, y: 0, width, height }
+    // The palette and the settings menu are modal: they own the window and
+    // take focus, which is also what gives them click-outside-to-close.
+    if (this.overlay.mode === 'palette' || this.overlay.mode === 'settings') {
+      return { x: 0, y: 0, width, height }
+    }
 
     const anchor = this.overlay.anchor
     if (!anchor) return { x: 0, y: 0, width, height }
@@ -233,7 +236,9 @@ export class AppWindow implements TabHost {
     if (payload.mode === 'palette') this.overlayHeight = 420
     this.sendOverlay('overlay:payload', payload)
     this.applyLayout()
-    if (payload.mode === 'palette') this.overlayView.webContents.focus()
+    if (payload.mode === 'palette' || payload.mode === 'settings') {
+      this.overlayView.webContents.focus()
+    }
   }
 
   closeOverlay(): void {

@@ -252,7 +252,7 @@ export interface SearchHit {
 /* Overlay                                                             */
 /* ------------------------------------------------------------------ */
 
-export type OverlayMode = 'palette' | 'find' | 'urlsuggest' | null
+export type OverlayMode = 'palette' | 'find' | 'urlsuggest' | 'settings' | null
 
 export interface OverlayPayload {
   mode: OverlayMode

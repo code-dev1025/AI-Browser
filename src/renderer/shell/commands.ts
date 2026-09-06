@@ -1,4 +1,4 @@
-import { send } from '../shared/api'
+import { api, send } from '../shared/api'
 import { emit } from '../shared/bus'
 import { useAi } from '../shared/store/ai'
 import { useLibrary } from '../shared/store/library'
@@ -61,6 +61,9 @@ export function runCommand(commandId: string, arg?: string): void {
         const tab = tabs[activeTabId]
         send('focus.set', { tabId: activeTabId, enabled: !tab?.focusMode })
       }
+      return
+    case 'settings.open':
+      void api.invoke('overlay.open', { mode: 'settings', anchor: null, query: '' })
       return
     case 'language.toggle':
       useLocaleStore.getState().toggleLocale()

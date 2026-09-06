@@ -4,6 +4,7 @@ import { api } from '../shared/api'
 import { Icon } from '../shared/Icon'
 import { COMMANDS } from '../shared/commands'
 import { bindLocale, useT } from '../shared/store/locale'
+import { SettingsMenu } from './SettingsMenu'
 import { shortUrl } from '../shared/format'
 
 /**
@@ -29,6 +30,7 @@ export function App(): React.ReactElement | null {
   }, [])
 
   if (payload.mode === 'palette') return <Palette />
+  if (payload.mode === 'settings') return <SettingsMenu anchor={payload.anchor} />
   if (payload.mode === 'urlsuggest') return <UrlSuggest query={payload.query} />
   if (payload.mode === 'find') return <FindBar />
   return null

@@ -73,6 +73,18 @@ body {
   width: 100%;
   color: var(--fg-2);
 }
+.prow {
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+.prow:hover {
+  background: var(--surface-hover);
+  color: var(--fg);
+}
+.prow:active {
+  background: var(--surface-active);
+}
 .prow[data-active='true'] {
   background: var(--accent-soft);
   color: var(--accent);
@@ -102,6 +114,137 @@ body {
   padding: 1px 5px;
   color: var(--fg-3);
   flex: none;
+}
+
+/* A menu hung off a control. The scrim stays transparent — a settings menu
+   should not dim the app — but still catches the click that dismisses it. */
+.scrim.plain {
+  background: transparent;
+  display: block;
+  padding: 0;
+}
+
+.menu {
+  position: absolute;
+  width: 300px;
+  max-width: calc(100vw - 24px);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow-2);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menu-title {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  padding: 2px 6px 8px;
+}
+
+.menu-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  min-width: 0;
+}
+
+.menu-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-sep {
+  height: 1px;
+  background: var(--line-soft);
+  margin: 6px 0;
+}
+
+.menu-block {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px;
+  min-width: 0;
+}
+
+.menu-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+.menu-state i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+.menu-state.ok {
+  color: var(--teal);
+}
+.menu-state.warn {
+  color: var(--amber);
+}
+.menu-state.bad {
+  color: var(--seal);
+}
+.menu-state.muted {
+  color: var(--fg-3);
+}
+
+.menu-detail {
+  font-size: 11.5px;
+  color: var(--fg-3);
+  line-height: 1.5;
+}
+
+/* Segmented control: the options stay visible, the chosen one is filled. */
+.segmented {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex: none;
+}
+.segmented button {
+  padding: 4px 11px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--fg-2);
+  background: transparent;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+.segmented button + button {
+  border-left: 1px solid var(--line);
+}
+.segmented button:hover {
+  background: var(--surface-hover);
+  color: var(--fg);
+}
+.segmented button:active {
+  background: var(--surface-active);
+}
+.segmented button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-weight: 600;
 }
 
 /* Anchored popups: sized to content, shell keeps focus */
@@ -159,6 +302,13 @@ body {
   place-items: center;
   flex: none;
 }
+.findbar button {
+  transition: background-color 0.12s ease;
+}
 .findbar button:hover {
-  background: var(--bg-3);
+  background: var(--surface-hover);
+  color: var(--fg);
+}
+.findbar button:active {
+  background: var(--surface-active);
 }
