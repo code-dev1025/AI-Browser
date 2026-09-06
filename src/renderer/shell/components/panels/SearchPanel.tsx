@@ -27,7 +27,7 @@ export function SearchPanel(): React.ReactElement {
         <h2>{t('search.title')}</h2>
       </header>
 
-      <div className="foot" style={{ borderTop: 0, borderBottom: '1px solid var(--line-soft)' }}>
+      <div className="panelfield">
         <input
           className="field"
           value={query}

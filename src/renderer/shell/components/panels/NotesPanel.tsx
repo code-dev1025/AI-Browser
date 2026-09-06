@@ -48,11 +48,17 @@ export function NotesPanel(): React.ReactElement {
     <div className="panel">
       <header>
         <h2>{t('notes.title')}</h2>
-        <span className="grow" />
-        <button className="chip" onClick={() => void captureHighlight()} disabled={!active?.url}>
+      </header>
+
+      <div className="panelactions">
+        <button
+          className="btn sm primary"
+          onClick={() => void captureHighlight()}
+          disabled={!active?.url}
+        >
           {t('notes.capture')}
         </button>
-      </header>
+      </div>
 
       <div className="body">
         {notes.length === 0 && (
@@ -68,11 +74,11 @@ export function NotesPanel(): React.ReactElement {
             <div className="d">{n.url ? shortUrl(n.url) : t('notes.no_page')}</div>
             <div style={{ display: 'flex', gap: 6 }}>
               {n.url && (
-                <button className="chip" onClick={() => api.invoke('tab.create', { url: n.url })}>
+                <button className="btn sm" onClick={() => api.invoke('tab.create', { url: n.url })}>
                   {t('common.open')}
                 </button>
               )}
-              <button className="chip" onClick={() => void removeNote(n.id)}>
+              <button className="btn sm" onClick={() => void removeNote(n.id)}>
                 {t('common.delete')}
               </button>
             </div>
@@ -81,22 +87,27 @@ export function NotesPanel(): React.ReactElement {
       </div>
 
       <div className="foot">
-        <textarea
-          className="field"
-          style={{ height: 56, padding: 6, resize: 'none' }}
-          value={draft}
-          placeholder={t('notes.placeholder')}
-          onChange={(e) => setDraft(e.target.value)}
-          onCompositionStart={() => setComposing(true)}
-          onCompositionEnd={() => setComposing(false)}
-          onKeyDown={(e) => {
-            if (e.nativeEvent.isComposing || composing || e.keyCode === 229) return
-            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) void saveNote()
-          }}
-        />
-        <button className="btn" style={{ marginTop: 6 }} onClick={() => void saveNote()}>
-          {t('notes.save_hint')}
-        </button>
+        <div className="composer">
+          <textarea
+            value={draft}
+            placeholder={t('notes.placeholder')}
+            onChange={(e) => setDraft(e.target.value)}
+            onCompositionStart={() => setComposing(true)}
+            onCompositionEnd={() => setComposing(false)}
+            onKeyDown={(e) => {
+              if (e.nativeEvent.isComposing || composing || e.keyCode === 229) return
+              if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) void saveNote()
+            }}
+          />
+          <button
+            className="btn primary send"
+            title={t('notes.save_tip')}
+            onClick={() => void saveNote()}
+            disabled={!draft.trim()}
+          >
+            {t('common.save')}
+          </button>
+        </div>
       </div>
     </div>
   )

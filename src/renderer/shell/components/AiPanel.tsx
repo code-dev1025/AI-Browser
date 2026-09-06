@@ -7,6 +7,7 @@ import { useT } from '../../shared/store/locale'
 import { useShell } from '../../shared/store/shell'
 import { useTabs } from '../../shared/store/tabs'
 import { useUi } from '../../shared/store/ui'
+import { Icon } from '../../shared/Icon'
 import { CompareTable } from './CompareTable'
 
 export function AiPanel(): React.ReactElement {
@@ -53,6 +54,17 @@ export function AiPanel(): React.ReactElement {
       <header>
         <h2>AI</h2>
         <button
+          className="iconbtn"
+          title={t('ai.close_panel')}
+          onClick={() => patchShell({ aiOpen: false })}
+        >
+          <Icon name="close" size={13} />
+        </button>
+      </header>
+
+      {/* Scope is a toggle, so it gets chips. */}
+      <div className="panelactions tight">
+        <button
           className="chip"
           aria-pressed={ai.scope === 'page'}
           onClick={() => ai.setScope('page')}
@@ -68,29 +80,26 @@ export function AiPanel(): React.ReactElement {
           {t('ai.scope_tabs')}
           {selection.length > 0 ? ` (${selection.length})` : ''}
         </button>
-        <span className="grow" />
-        <button className="chip" title={t('ai.close_panel')} onClick={() => patchShell({ aiOpen: false })}>
-          ×
-        </button>
-      </header>
+      </div>
 
-      <div className="foot" style={{ borderTop: 0, borderBottom: '1px solid var(--line-soft)', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      {/* These do something, so they get buttons. */}
+      <div className="panelactions">
         <button
-          className="chip"
+          className="btn sm"
           disabled={ai.working !== null}
           onClick={() => void ai.runOrganize(targetTabs())}
         >
           {t(ai.working === 'organize' ? 'ai.organizing' : 'ai.organize')}
         </button>
         <button
-          className="chip"
+          className="btn sm"
           disabled={ai.working !== null}
           onClick={() => void ai.runSummaries(targetTabs())}
         >
           {t(ai.working === 'summaries' ? 'ai.summarizing' : 'ai.summarize')}
         </button>
         <button
-          className="chip"
+          className="btn sm"
           disabled={ai.working !== null || targetTabs().length < 2}
           title={t('ai.compare_tip')}
           onClick={() => void ai.runCompare(targetTabs().slice(0, 4))}
@@ -98,7 +107,7 @@ export function AiPanel(): React.ReactElement {
           {t(ai.working === 'compare' ? 'ai.comparing' : 'ai.compare')}
         </button>
         {selection.length > 0 && (
-          <button className="chip" onClick={clearSelection}>
+          <button className="btn sm" onClick={clearSelection}>
             {t('ai.clear_selection')}
           </button>
         )}
@@ -141,7 +150,7 @@ export function AiPanel(): React.ReactElement {
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <strong style={{ fontSize: 12 }}>{t('ai.summaries', { n: ai.summaries.length })}</strong>
               <span style={{ flex: 1 }} />
-              <button className="chip" onClick={() => ai.dismiss('summaries')}>
+              <button className="btn sm" onClick={() => ai.dismiss('summaries')}>
                 {t('common.close')}
               </button>
             </div>

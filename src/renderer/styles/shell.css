@@ -81,6 +81,21 @@
   -webkit-app-region: drag;
 }
 
+/* A status mark on a control, used only when something is wrong. */
+.iconbtn.hasdot {
+  position: relative;
+}
+.iconbtn .dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--seal);
+  box-shadow: 0 0 0 2px var(--bg-2);
+}
+
 .titlebar .brand i {
   width: 8px;
   height: 8px;
@@ -108,6 +123,7 @@
   border: 1px solid var(--line);
   color: var(--fg-3);
   white-space: nowrap;
+  flex: none;
 }
 .badge.mock {
   color: var(--amber);
@@ -137,12 +153,24 @@
   place-items: center;
   color: var(--fg-2);
 }
+.wincontrols button {
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
 .wincontrols button:hover {
-  background: var(--bg-3);
+  background: var(--surface-hover);
   color: var(--fg);
+}
+.wincontrols button:active {
+  background: var(--surface-active);
 }
 .wincontrols button.close:hover {
   background: #c42b1c;
+  color: #ffffff;
+}
+.wincontrols button.close:active {
+  background: #a52216;
   color: #ffffff;
 }
 
@@ -163,9 +191,17 @@
   color: var(--fg-3);
   line-height: 1.5;
 }
+.langpicker button {
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
 .langpicker button:hover {
   color: var(--fg);
-  background: var(--bg-3);
+  background: var(--surface-hover);
+}
+.langpicker button:active {
+  background: var(--surface-active);
 }
 .langpicker button[aria-pressed='true'] {
   background: var(--accent);
@@ -198,8 +234,11 @@
   transition: background 0.1s ease;
 }
 .iconbtn:hover:not(:disabled) {
-  background: var(--bg-3);
+  background: var(--surface-hover);
   color: var(--fg);
+}
+.iconbtn:active:not(:disabled) {
+  background: var(--surface-active);
 }
 .iconbtn:disabled {
   opacity: 0.32;
@@ -285,9 +324,18 @@
   color: var(--fg-2);
   flex: 0 1 auto;
   position: relative;
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
 }
 .tab:hover {
-  background: var(--bg-3);
+  background: var(--surface-hover);
+}
+/* Tabs are draggable, so a held tab says so. */
+.tab:active {
+  cursor: grabbing;
+  background: var(--surface-active);
 }
 .tab[data-active='true'] {
   background: var(--bg-2);
@@ -329,12 +377,17 @@
   background: var(--seal-soft);
   color: var(--seal);
 }
+.tab .close:active {
+  background: var(--seal);
+  color: #ffffff;
+}
 .tab.dragover {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
 
 .grouptag {
+  transition: filter 0.12s ease;
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -360,7 +413,11 @@
   align-self: center;
 }
 .newtab:hover {
-  background: var(--bg-3);
+  background: var(--surface-hover);
+  color: var(--fg);
+}
+.newtab:active {
+  background: var(--surface-active);
 }
 
 /* ------------------------------------------------------------------ */
@@ -394,9 +451,17 @@
   color: var(--fg-3);
   position: relative;
 }
+.railbtn {
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
 .railbtn:hover {
-  background: var(--bg-3);
+  background: var(--surface-hover);
   color: var(--fg);
+}
+.railbtn:active {
+  background: var(--surface-active);
 }
 .railbtn[aria-pressed='true'] {
   background: var(--accent-soft);
@@ -465,8 +530,17 @@
   text-align: left;
   width: 100%;
 }
+.vtab {
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
 .vtab:hover {
-  background: var(--bg-3);
+  background: var(--surface-hover);
+  color: var(--fg);
+}
+.vtab:active {
+  background: var(--surface-active);
 }
 .vtab[data-active='true'] {
   background: var(--bg-3);
@@ -573,8 +647,17 @@
   gap: 4px;
   min-width: 0;
 }
+.card {
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease;
+}
 .card:hover {
   border-color: var(--accent);
+  background: var(--surface-hover);
+}
+.card:active {
+  background: var(--surface-active);
 }
 .card .t {
   font-weight: 600;
@@ -607,20 +690,52 @@
   filter: grayscale(0.5) brightness(0.8);
 }
 
+/* ------------------------------------------------------------------ */
+/* Controls — three roles, and only three                              */
+/*                                                                     */
+/*   .btn        a labelled action        (quiet by default)           */
+/*   .btn.primary the one action a surface exists for                  */
+/*   .iconbtn    a square, icon-only action                            */
+/*                                                                     */
+/* `.chip` is a TOGGLE, never an action.                               */
+/*                                                                     */
+/* Every control answers the same four states, in the same 120ms:      */
+/*   hover     surface lifts to --surface-hover, text to --fg          */
+/*   active    surface drops to --surface-active (press is felt)       */
+/*   focus     2px --accent ring, keyboard only                        */
+/*   disabled  40% opacity, cursor: not-allowed, no hover              */
+/*                                                                     */
+/* And none of them wrap or shrink: a button that can wrap becomes a   */
+/* two-line stub the moment its panel gets narrow.                     */
+/* ------------------------------------------------------------------ */
+
 .btn {
-  height: 28px;
-  padding: 0 14px;
+  height: 26px;
+  padding: 0 12px;
   border-radius: var(--radius-sm);
   background: var(--bg-3);
   border: 1px solid var(--line);
   color: var(--fg);
   font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  flex: none;
+  white-space: nowrap;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
 }
-.btn:hover {
-  border-color: var(--accent);
+.btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--fg-3);
+}
+.btn:active:not(:disabled) {
+  background: var(--surface-active);
 }
 .btn.primary {
   background: var(--accent);
@@ -628,12 +743,27 @@
   border-color: transparent;
   font-weight: 600;
 }
-.btn.danger:hover {
+.btn.primary:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: transparent;
+  filter: brightness(1.12);
+}
+.btn.primary:active:not(:disabled) {
+  filter: brightness(0.92);
+}
+.btn.danger:hover:not(:disabled) {
+  background: var(--seal-soft);
   border-color: var(--seal);
   color: var(--seal);
 }
 .btn:disabled {
   opacity: 0.4;
+}
+/* Compact variant for panel action rows, where vertical space is scarce. */
+.btn.sm {
+  height: 22px;
+  padding: 0 9px;
+  font-size: 11.5px;
 }
 
 /* ------------------------------------------------------------------ */
@@ -648,22 +778,65 @@
   background: var(--bg-2);
   overflow: hidden;
 }
+/* The header holds the title and nothing that can push it around. Actions
+   live in their own row underneath, so a 208px sidebar never has to fit a
+   label and a button on the same line. */
 .panel > header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 12px;
-  border-bottom: 1px solid var(--line-soft);
+  padding: 10px 12px 8px;
   flex: none;
+  min-width: 0;
 }
 .panel > header h2 {
+  flex: 1;
+  min-width: 0;
   font-size: 12px;
   margin: 0;
   font-weight: 600;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .panel > header .grow {
   flex: 1;
+}
+
+/* Two action rows in a row: only the last one carries the divider. */
+.panelactions.tight {
+  border-bottom: 0;
+  padding-bottom: 6px;
+}
+
+.panelactions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 0 12px 10px;
+  border-bottom: 1px solid var(--line-soft);
+  flex: none;
+}
+
+/* An input and its action on one line: the field gives, the button never does. */
+.rowfield {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.rowfield .field {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+
+/* A single full-width field under the header (search, filter). */
+.panelfield {
+  padding: 0 12px 10px;
+  border-bottom: 1px solid var(--line-soft);
+  flex: none;
 }
 .panel .body {
   flex: 1;
@@ -684,17 +857,43 @@
 }
 
 .chip {
-  font-size: 11px;
-  padding: 2px 8px;
+  height: 22px;
+  padding: 0 10px;
   border-radius: 999px;
   border: 1px solid var(--line);
+  background: transparent;
   color: var(--fg-2);
+  font-size: 11.5px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  white-space: nowrap;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
+.chip:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--fg);
+}
+.chip:active:not(:disabled) {
+  background: var(--surface-active);
 }
 .chip[aria-pressed='true'] {
   background: var(--accent-soft);
   border-color: transparent;
   color: var(--accent);
   font-weight: 600;
+}
+.chip[aria-pressed='true']:hover:not(:disabled) {
+  filter: brightness(1.1);
+  background: var(--accent-soft);
+}
+.chip:disabled {
+  opacity: 0.4;
 }
 
 .msg {
@@ -739,9 +938,19 @@
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   overflow: hidden;
 }
+.cite {
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
 .cite:hover {
   color: var(--fg);
+  background: var(--surface-hover);
   border-left-color: var(--seal);
+}
+.cite:active {
+  background: var(--surface-active);
 }
 .cite b {
   display: block;
@@ -795,8 +1004,14 @@
   width: 100%;
   min-width: 0;
 }
+.listrow {
+  transition: background-color 0.12s ease;
+}
 .listrow:hover {
-  background: var(--bg-3);
+  background: var(--surface-hover);
+}
+.listrow:active {
+  background: var(--surface-active);
 }
 .listrow .t {
   font-size: 12px;

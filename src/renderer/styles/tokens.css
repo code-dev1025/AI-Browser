@@ -15,6 +15,10 @@
   --bg-2: #f8fafc;
   --bg-3: #ffffff;
   --bg-sunken: #e2e7ef;
+  /* Interaction surfaces. Concrete values per theme rather than translucent
+     overlays, so a control reads the same on every background it sits on. */
+  --surface-hover: #e6ebf3;
+  --surface-active: #d9e0ea;
   --fg: #141922;
   --fg-2: #4b5568;
   --fg-3: #7c879b;
@@ -61,6 +65,8 @@
     --bg-2: #171b24;
     --bg-3: #1f2430;
     --bg-sunken: #0c0f15;
+    --surface-hover: #262c3a;
+    --surface-active: #2f3646;
     --fg: #e7eaf1;
     --fg-2: #aeb6c6;
     --fg-3: #7f8899;
@@ -109,6 +115,15 @@ body {
   overflow-wrap: anywhere;
   -webkit-font-smoothing: antialiased;
   user-select: none;
+  /* CURSOR POLICY — one rule per kind of thing, applied everywhere.
+       chrome surface / plain label   default   (this line)
+       anything clickable             pointer
+       anything typeable              text
+       a splitter                     col-resize
+       a disabled control             not-allowed
+       a tab being dragged            grabbing
+     Nothing else sets `cursor`; if a control needs a different one it is
+     because it is a different kind of thing. */
   cursor: default;
 }
 
@@ -118,7 +133,13 @@ button {
   background: none;
   border: 0;
   padding: 0;
-  cursor: default;
+  cursor: pointer;
+  /* A control that cannot wrap cannot collapse into a two-line stub. */
+  white-space: nowrap;
+}
+
+button:disabled {
+  cursor: not-allowed;
 }
 
 input,
@@ -126,6 +147,12 @@ textarea {
   font: inherit;
   color: inherit;
   user-select: text;
+  cursor: text;
+}
+
+input:disabled,
+textarea:disabled {
+  cursor: not-allowed;
 }
 
 :focus-visible {

@@ -36,6 +36,7 @@ const ja = {
   'common.stop': '停止',
   'common.clear': '消去',
   'common.tabs': '{n} タブ',
+  'common.tabs_one': '{n} タブ',
   'common.today': '今日',
   'common.yesterday': '昨日',
 
@@ -86,6 +87,7 @@ const ja = {
   'tab.audible': '音声再生中',
   'vtabs.pinned': 'ピン留め',
   'vtabs.importance': '重要度順 · {n} タブ',
+  'vtabs.importance_one': '重要度順 · {n} タブ',
   'vtabs.asleep': '休眠中',
 
   /* --- rail --- */
@@ -100,6 +102,7 @@ const ja = {
   'start.recent': '最近見たページ',
   'start.workspaces': '保存済みワークスペース',
   'start.restore_n': '{n} タブを復元',
+  'start.restore_n_one': '{n} タブを復元',
   'start.notes': '保存したメモ · {n} 件',
   'start.note': 'メモ',
   'pane.empty': 'このペインは空です。タブを選ぶと表示されます。',
@@ -125,6 +128,7 @@ const ja = {
   'ai.suggest_groups': 'グループ提案',
   'ai.apply_groups': 'この分類を適用',
   'ai.summaries': 'まとめ · {n} ページ',
+  'ai.summaries_one': 'まとめ · {n} ページ',
   'ai.reading_minutes': '約{n}分',
   'ai.you': 'あなた',
   'ai.error': 'エラー: {message}',
@@ -155,7 +159,7 @@ const ja = {
   'notes.empty': 'ページ上でテキストを選択し「選択範囲を保存」を押すと、ハイライトとして知識庫に残ります。',
   'notes.no_page': 'ページ指定なし',
   'notes.placeholder': 'メモを追加…',
-  'notes.save_hint': '保存 (Ctrl+Enter)',
+  'notes.save_tip': '保存 (Ctrl+Enter)',
 
   /* --- workspaces --- */
   'ws.title': 'ワークスペース',
@@ -278,6 +282,7 @@ const en: Record<MessageKey, string> = {
   'common.stop': 'Stop',
   'common.clear': 'Clear',
   'common.tabs': '{n} tabs',
+  'common.tabs_one': '{n} tab',
   'common.today': 'Today',
   'common.yesterday': 'Yesterday',
 
@@ -325,6 +330,7 @@ const en: Record<MessageKey, string> = {
   'tab.audible': 'Playing audio',
   'vtabs.pinned': 'Pinned',
   'vtabs.importance': 'By importance · {n} tabs',
+  'vtabs.importance_one': 'By importance · {n} tab',
   'vtabs.asleep': 'Asleep',
 
   'rail.search': 'Search — find past pages in plain language',
@@ -337,6 +343,7 @@ const en: Record<MessageKey, string> = {
   'start.recent': 'Recently visited',
   'start.workspaces': 'Saved workspaces',
   'start.restore_n': 'Restore {n} tabs',
+  'start.restore_n_one': 'Restore {n} tab',
   'start.notes': 'Saved notes · {n}',
   'start.note': 'Note',
   'pane.empty': 'This pane is empty. Pick a tab to show it here.',
@@ -362,6 +369,7 @@ const en: Record<MessageKey, string> = {
   'ai.suggest_groups': 'Suggested groups',
   'ai.apply_groups': 'Apply these groups',
   'ai.summaries': 'Summaries · {n} pages',
+  'ai.summaries_one': 'Summary · {n} page',
   'ai.reading_minutes': '~{n} min',
   'ai.you': 'You',
   'ai.error': 'Error: {message}',
@@ -388,7 +396,7 @@ const en: Record<MessageKey, string> = {
     'Select text on a page and press “Save selection” to keep it in your library as a highlight.',
   'notes.no_page': 'No page',
   'notes.placeholder': 'Add a note…',
-  'notes.save_hint': 'Save (Ctrl+Enter)',
+  'notes.save_tip': 'Save (Ctrl+Enter)',
 
   'ws.title': 'Workspaces',
   'ws.empty': 'Save the whole working set now and bring it back later in the same order.',
@@ -496,8 +504,16 @@ const DICTIONARIES: Record<Locale, Record<MessageKey, string>> = { ja, en }
 
 export type MessageParams = Record<string, string | number>
 
+/**
+ * `translate(locale, key, {n: 1})` prefers a `<key>_one` entry when one exists.
+ * Just enough plural handling for counts in the UI: English gets its singular,
+ * Japanese needs no variant and simply has no `_one` key to find.
+ */
 export function translate(locale: Locale, key: MessageKey, params?: MessageParams): string {
-  const template = DICTIONARIES[locale][key] ?? ja[key] ?? key
+  const dict = DICTIONARIES[locale]
+  const singular =
+    params && params['n'] === 1 ? (dict as Record<string, string>)[`${key}_one`] : undefined
+  const template = singular ?? dict[key] ?? ja[key] ?? key
   if (!params) return template
   return template.replace(/\{(\w+)\}/g, (match, name: string) => {
     const value = params[name]

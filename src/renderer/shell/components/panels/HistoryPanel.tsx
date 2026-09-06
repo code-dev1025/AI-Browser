@@ -21,9 +21,11 @@ export function HistoryPanel(): React.ReactElement {
     <div className="panel">
       <header>
         <h2>{t('history.title')}</h2>
-        <span className="grow" />
+      </header>
+
+      <div className="panelactions">
         <button
-          className="chip"
+          className="btn sm"
           onClick={() => {
             send('history.clear')
             void loadHistory()
@@ -31,7 +33,7 @@ export function HistoryPanel(): React.ReactElement {
         >
           {t('common.clear')}
         </button>
-      </header>
+      </div>
       <div className="body">
         {history.length === 0 && (
           <p className="empty">{t('history.empty')}</p>

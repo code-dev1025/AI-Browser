@@ -20,7 +20,7 @@ export function CompareTable({
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px' }}>
         <strong style={{ fontSize: 12 }}>{t('compare.title')}</strong>
         <span style={{ flex: 1 }} />
-        <button className="chip" onClick={onDismiss}>
+        <button className="btn sm" onClick={onDismiss}>
           {t('common.close')}
         </button>
       </div>
